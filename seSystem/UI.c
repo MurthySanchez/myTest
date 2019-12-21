@@ -21,6 +21,8 @@ int UI(char* name){
     GtkWidget* button;//定义按钮
     GtkWidget* table;//定义table
     GtkWidget* image;//image
+    GtkWidget* frame;//frame
+    GtkWidget* label;//label
     gtk_init(NULL,NULL);//初始化
 
     /*窗口初始化*/
@@ -43,6 +45,22 @@ int UI(char* name){
     gtk_widget_show(image);
     /*********************/
 
+    /*frame for 用户名*/
+    /*********************/
+    // frame=gtk_frame_new("");
+    label=gtk_label_new("用户名");
+    // gtk_container_add(GTK_CONTAINER(frame),label);
+    gtk_table_attach_defaults(GTK_TABLE(table),label,9,11,9,10);
+    /*********************/
+
+    /*frame for 密码*/
+    /*********************/
+    // frame=gtk_frame_new("");
+    label=gtk_label_new("密码");
+    // gtk_container_add(GTK_CONTAINER(frame),label);
+    gtk_table_attach_defaults(GTK_TABLE(table),label,9,11,11,12);
+    /*********************/
+
     /*退出按钮*/
     /*********************/
     button=gtk_button_new_with_label("exit");
@@ -52,7 +70,7 @@ int UI(char* name){
     /*********************/
 
     gtk_widget_show(table);
-    gtk_widget_show(window);    //显示窗口
+    gtk_widget_show_all(window);    //显示窗口(all)
     gtk_main(); //gtk+2.0等待事件(如键盘事件或鼠标事件) 的发生
 
     return FALSE;
