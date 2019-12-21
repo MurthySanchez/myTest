@@ -24,6 +24,17 @@ void enter_callback( GtkWidget *widget, GtkWidget *entry )
    printf("Entry contents: %s\n", entry_text);
 }
 
+// 鼠标移动事件(点击鼠标任何键)的处理函数
+gboolean deal_motion_notify_event(GtkWidget *widget, GdkEventMotion *event, gpointer data)
+{
+	// 获得移动鼠标的坐标值，距离窗口左顶点
+	gint i = event->x;
+	gint j = event->y;
+	printf("motion_x = %d, motion_y = %d\n", i, j);
+	
+	return TRUE;
+}
+
 int UI(char* name){
     GtkWidget* window;//定义窗口
     GtkWidget* button;//定义按钮
@@ -83,6 +94,8 @@ int UI(char* name){
     image=gtk_image_new_from_file("./image/eye.png");
     // gtk_entry_set_icon_activatable(GTK_ENTRY(entry),"./image/eye.png",TRUE);
     gtk_table_attach_defaults(GTK_TABLE(table),image,19,20,11,12);
+    gtk_widget_add_events(image, GDK_BUTTON_PRESS_MASK | GDK_BUTTON_MOTION_MASK);
+    g_signal_connect(image,"motion-notify-event",G_CALLBACK(deal_motion_notify_event),image);
     gtk_widget_show(image);
     /*********************/
 
