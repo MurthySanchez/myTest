@@ -17,6 +17,13 @@ void delete_event( GtkWidget *widget, GdkEvent  *event, gpointer   data )
   
 }
 
+void enter_callback( GtkWidget *widget, GtkWidget *entry )
+{
+   const gchar *entry_text;
+   entry_text = gtk_entry_get_text (GTK_ENTRY (entry));
+   printf("Entry contents: %s\n", entry_text);
+}
+
 int UI(char* name){
     GtkWidget* window;//定义窗口
     GtkWidget* button;//定义按钮
@@ -24,7 +31,7 @@ int UI(char* name){
     GtkWidget* image;//image
     GtkWidget* frame;//frame
     GtkWidget* label;//label
-    GtkWidget* textField;
+    GtkWidget* entry;//entry
     gtk_init(NULL,NULL);//初始化
 
     /*窗口初始化*/
@@ -53,10 +60,11 @@ int UI(char* name){
     label=gtk_label_new("用户名");
     // gtk_container_add(GTK_CONTAINER(frame),label);
     gtk_table_attach_defaults(GTK_TABLE(table),label,9,11,9,10);
-    textField=gtk_text_view_new();
-    // gtk_widget_set_size_request(textField,60,30);
-    
-    gtk_table_attach_defaults(GTK_TABLE(table),textField,12,19,9,10);
+
+    entry=gtk_entry_new();
+    gtk_entry_set_max_length (GTK_ENTRY (entry), 50);
+    g_signal_connect (G_OBJECT (entry), "activate", G_CALLBACK (enter_callback), entry);
+    gtk_table_attach_defaults(GTK_TABLE(table),entry,12,19,9,10);
     /*********************/
 
     /*frame for 密码*/
@@ -65,9 +73,17 @@ int UI(char* name){
     label=gtk_label_new("密码");
     // gtk_container_add(GTK_CONTAINER(frame),label);
     gtk_table_attach_defaults(GTK_TABLE(table),label,9,11,11,12);
-    textField=gtk_text_view_new();
-    // gtk_widget_set_size_request(textField,60,30);
-    gtk_table_attach_defaults(GTK_TABLE(table),textField,12,19,11,12);
+
+    entry=gtk_entry_new();
+    gtk_entry_set_max_length (GTK_ENTRY (entry), 50);
+    // g_signal_connect (G_OBJECT (entry), "activate", G_CALLBACK (enter_callback), entry);
+    gtk_entry_set_visibility(GTK_ENTRY(entry),FALSE);
+    gtk_table_attach_defaults(GTK_TABLE(table),entry,12,19,11,12);
+
+    image=gtk_image_new_from_file("./image/eye.png");
+    // gtk_entry_set_icon_activatable(GTK_ENTRY(entry),"./image/eye.png",TRUE);
+    gtk_table_attach_defaults(GTK_TABLE(table),image,19,20,11,12);
+    gtk_widget_show(image);
     /*********************/
 
     /*登陆按钮*/
