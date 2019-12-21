@@ -8,17 +8,10 @@
  *          添加输入框
  * */
 
-gint delete_event( GtkWidget *widget, GdkEvent  *event, gpointer   data )
-{
-    /* 如果你的 "delete_event" 信号处理函数返回 FALSE，GTK 会发出 "destroy" 信号。
-     * 返回 TRUE，你不希望关闭窗口。
-     * 当你想弹出“你确定要退出吗?”对话框时它很有用。*/
- 
-    g_print ("delete event occurred\n");
- 
-    /* 改 TRUE 为 FALSE 程序会关闭。*/
- 
-    return FALSE;
+void delete_event( GtkWidget *widget, GdkEvent  *event, gpointer   data )
+{ 
+    g_print ("user clicked exit\n");
+  
 }
 
 int UI(char name[]){
@@ -39,7 +32,8 @@ int UI(char name[]){
 
     /*按钮初始化*/
     btn_cls=gtk_button_new_with_label("exit");
-    g_signal_connect_swapped(G_OBJECT(btn_cls),"cliked",G_CALLBACK(delete_event),window);   //点击弹出退出
+    g_signal_connect(G_OBJECT(btn_cls),"clicked",G_CALLBACK(delete_event),window);
+    g_signal_connect_swapped(G_OBJECT(btn_cls),"clicked",G_CALLBACK(gtk_widget_destroy),window);   //点击弹出退出
     gtk_container_add(GTK_CONTAINER(window),btn_cls);   //将btn加入
     gtk_widget_show(btn_cls);   //显示按钮
 

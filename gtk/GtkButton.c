@@ -64,8 +64,8 @@ int main( int   argc, char *argv[] )
     
     /* 当点击按钮时，会通过调用 gtk_widget_destroy(window) 来关闭窗口。
      * "destroy" 信号会从这里或从窗口管理器发出。*/
-   // g_signal_connect_swapped (G_OBJECT (button), "clicked",
-   //      G_CALLBACK (gtk_widget_destroy),window);
+   g_signal_connect_swapped (G_OBJECT (button), "clicked",
+        G_CALLBACK (gtk_widget_destroy),window);
     
     /* 把按钮放入窗口 (一个 gtk 容器) 中。*/
     gtk_container_add (GTK_CONTAINER (window), button);
