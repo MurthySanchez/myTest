@@ -7,6 +7,7 @@
  * 退出按钮ok
  * 设置窗口为19*27的格子
  *  添加系统logo 大小：125*89p
+ * 添加label用户名，密码
  * */
 
 void delete_event( GtkWidget *widget, GdkEvent  *event, gpointer   data )
@@ -23,6 +24,7 @@ int UI(char* name){
     GtkWidget* image;//image
     GtkWidget* frame;//frame
     GtkWidget* label;//label
+    GtkWidget* textField;
     gtk_init(NULL,NULL);//初始化
 
     /*窗口初始化*/
@@ -51,6 +53,10 @@ int UI(char* name){
     label=gtk_label_new("用户名");
     // gtk_container_add(GTK_CONTAINER(frame),label);
     gtk_table_attach_defaults(GTK_TABLE(table),label,9,11,9,10);
+    textField=gtk_text_view_new();
+    // gtk_widget_set_size_request(textField,60,30);
+    
+    gtk_table_attach_defaults(GTK_TABLE(table),textField,12,19,9,10);
     /*********************/
 
     /*frame for 密码*/
@@ -59,11 +65,22 @@ int UI(char* name){
     label=gtk_label_new("密码");
     // gtk_container_add(GTK_CONTAINER(frame),label);
     gtk_table_attach_defaults(GTK_TABLE(table),label,9,11,11,12);
+    textField=gtk_text_view_new();
+    // gtk_widget_set_size_request(textField,60,30);
+    gtk_table_attach_defaults(GTK_TABLE(table),textField,12,19,11,12);
+    /*********************/
+
+    /*登陆按钮*/
+    /*********************/
+    button=gtk_button_new_with_label("登陆");
+    // g_signal_connect(G_OBJECT(button),"clicked",G_CALLBACK(delete_event),window);
+    gtk_table_attach_defaults(GTK_TABLE(table),button,11,17,13,14);
+    gtk_widget_show(button);   //显示按钮
     /*********************/
 
     /*退出按钮*/
     /*********************/
-    button=gtk_button_new_with_label("exit");
+    button=gtk_button_new_with_label("退出系统");
     g_signal_connect(G_OBJECT(button),"clicked",G_CALLBACK(delete_event),window);
     gtk_table_attach_defaults(GTK_TABLE(table),button,23,25,16,17);
     gtk_widget_show(button);   //显示按钮
