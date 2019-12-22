@@ -1,8 +1,8 @@
 #include "gtk/gtk.h"
 #include "stdio.h"
 #include "stdlib.h"
+#include "mymysql.h"
 #include "UI.h"
-#include "mysql.h"
 
 #define WIDTH 846
 #define HEIGHT 600
@@ -13,6 +13,7 @@
  *  添加系统logo 大小：125*89p
  * 添加label用户名，密码
  * 添加用户名输入框，密码输入框（不可见）
+ * 添加bj
  * */
 
 struct Input
@@ -54,7 +55,8 @@ void callBack(GtkWidget *widget, gpointer data)
     /*********************/
     if(!connect_mysql())
         printf("Connected MySQL successful! \n");
-    mysql_close(&mysql);
+    if(!close_mysql())
+        printf("DB closed success!\n");
     /*********************/
 }
 

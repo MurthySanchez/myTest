@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <mysql/mysql.h>
-#include "mysql.h"
+#include "mymysql.h"
 #include "config.h"
 
 #define MAX_BUF_SIZE 1024 //缓冲区最大字节数
@@ -46,6 +46,15 @@ int connect_mysql()
         return -1;
     }
 
+    return 0;
+}
+
+/**
+ * close the mysql
+ * */
+int close_mysql()
+{
+    mysql_close(&mysql);
     return 0;
 }
 

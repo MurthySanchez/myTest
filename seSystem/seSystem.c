@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "mysql/mysql.h"
+#include "mysql.h"
+#include "UI.h"
 
 struct admin_id
 {

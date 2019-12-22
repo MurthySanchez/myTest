@@ -66,7 +66,7 @@ int main(void) {
 
     if (executesql(sql))
         print_mysql_error(NULL);
-    if (executesql("select * from user")) // 句末没有分号
+    if (executesql("select * from admin")) // 句末没有分号
         print_mysql_error(NULL);
 
     g_res = mysql_store_result(g_conn); // 从服务器传送结果集至本地，mysql_use_result直接使用服务器上的记录集
