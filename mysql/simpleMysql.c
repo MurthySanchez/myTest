@@ -1,40 +1,89 @@
+
+/*
+ ============================================================================
+ Name        : connect.c
+ Author      : 林泽归来
+ Version     :
+ Copyright   : Your copyright notice
+ Description : Connect Mysql
+ ============================================================================
+ */
+
 #include <stdio.h>
-#include <mysql.h>
-void printResult(MYSQL *mysql);
-int main(){
-	MYSQL mysql;
-	MYSQL_RES *result;
-	mysql_init(&mysql);
-	mysql_real_connect(&mysql,"127.0.0.1","root","123456",NULL,3355,NULL,0);
-	mysql_query(&mysql,"show databases");
-	printResult(&mysql);
-	mysql_close(&mysql);
-}
-void printResult(MYSQL *mysqlPrint)//打印结果集(此处传入指针，而非内容)
-{
-    MYSQL_RES * result;
-    int numFields = 0;
-    int numRows = 0;
-    MYSQL_FIELD * field;
-    MYSQL_ROW row;
-    int i = 0;
-    result = mysql_store_result(mysqlPrint);//将查询的全部结果读取到客户端
-    numFields = mysql_num_fields(result);//统计结果集中的字段数
-    numRows = mysql_num_rows(result);//统计结果集的行数
-    while(field = mysql_fetch_field(result))//返回结果集中的列信息(字段)
-        printf("%s\t", field->name);
-    printf("\n");
-    if(result)
-    {
-        while(row = mysql_fetch_row(result))//返回结果集中行的记录
-        {
-            for(i = 0; i < numFields; i++)
-            {
-                printf("%s\t", row[i]);
-            }
-            printf("\n");
-        }
-    }
-    mysql_free_result(result);//释放result空间，避免内存泄漏
+#include <stdlib.h>
+#include <string.h>
+#include <mysql/mysql.h>
+
+MYSQL *g_conn; // mysql 连接
+MYSQL_RES *g_res; // mysql 记录集
+MYSQL_ROW g_row; // 字符串数组，mysql 记录行
+
+#define MAX_BUF_SIZE 1024 // 缓冲区最大字节数
+
+const char *g_host_name = "localhost";
+const char *g_user_name = "root";
+const char *g_password = "123456";
+const char *g_db_name = "companyAttendanceSystem";
+const unsigned int g_db_port = 3306;
+
+void print_mysql_error(const char *msg) { // 打印最后一次错误
+    if (msg)
+        printf("%s: %s\n", msg, mysql_error(g_conn));
+    else
+        puts(mysql_error(g_conn));
 }
 
+int executesql(const char * sql) {
+    /*query the database according the sql*/
+    if (mysql_real_query(g_conn, sql, strlen(sql))) // 如果失败
+        return -1; // 表示失败
+
+    return 0; // 成功执行
+}
+
+
+int init_mysql() { // 初始化连接
+    // init the database connection
+    g_conn = mysql_init(NULL);
+    /*设置字符编码,可能会乱码*/
+    mysql_query(g_conn,"set nemas utf-8");
+    /* connect the database */
+    if(!mysql_real_connect(g_conn, g_host_name, g_user_name, g_password, g_db_name, g_db_port, NULL, 0)) // 如果失败
+        return -1;
+
+    // 是否连接已经可用
+    //if (executesql("set names utf8")) // 如果失败
+       // return -1;
+    return 0; // 返回成功
+}
+
+
+int main(void) {
+    if (init_mysql());
+        print_mysql_error(NULL);
+
+    char sql[MAX_BUF_SIZE];
+
+    if (executesql(sql))
+        print_mysql_error(NULL);
+    if (executesql("select * from user")) // 句末没有分号
+        print_mysql_error(NULL);
+
+    g_res = mysql_store_result(g_conn); // 从服务器传送结果集至本地，mysql_use_result直接使用服务器上的记录集
+
+    int iNum_rows = mysql_num_rows(g_res); // 得到记录的行数
+    int iNum_fields = mysql_num_fields(g_res); // 得到记录的列数
+
+    printf("共%d个记录，每个记录%d字段\n", iNum_rows, iNum_fields);
+
+    puts("id\tname\n");
+
+    while ((g_row=mysql_fetch_row(g_res))) // 打印结果集
+        printf("%s\t%s\n", g_row[0], g_row[1]); // 第一，第二字段
+
+    mysql_free_result(g_res); // 释放结果集
+
+    mysql_close(g_conn); // 关闭链接
+
+    return EXIT_SUCCESS;
+}
