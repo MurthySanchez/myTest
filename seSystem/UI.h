@@ -5,6 +5,6 @@
 #include "stdio.h"
 #include "stdlib.h"
 
-int UI(char name[]);
+int UI(char* name);
 
 #endif
