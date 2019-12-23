@@ -4,6 +4,7 @@
 #include "mysql.h"
 #include "UI.h"
 
+
 struct admin_id
 {
     int id;
@@ -64,6 +65,7 @@ int menuDemo()
 
     return 0;
 }
+
 
 int main()
 {

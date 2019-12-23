@@ -1,13 +1,11 @@
 #include <stdio.h>
 #include "test.h"
 
-void print_hello(void){
-    printf("hello\n");
-}
-
 int add(int a,int b)
 {
+    printf("%d\n",c);
    return a+b;
 }
+
 
 

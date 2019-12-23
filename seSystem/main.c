@@ -1,13 +1,49 @@
+#include "mymysql.h"
+#include "UI.h"
 #include "gtk/gtk.h"
+#include "mysql/mysql.h"
 #include "stdio.h"
 #include "stdlib.h"
-#include  "test.h"
 
+#define SYSTEM_NAME "Company Attendance System"
+
+/*全局变量*/
+MYSQL* mysql;
+
+/**************
+ * 初始化系统
+ * *************/
+int init_system(){
+    if (!(mysql=mysql_init(NULL)))
+    { //分配和初始化MYSQL对象
+        printf("mysql_init(): %s\n", mysql_error(mysql));
+        return -1;
+    }
+    if (connect_mysql(mysql)==0)
+        printf("Connected MySQL successful! \n");
+    
+    return 0;    
+}
+
+/*************
+ * *main函数
+ * ************/
 int main()
 {
-    int a = 1,b =2;
-   int c = add(a,b);   //这里是对function.c中的add函数的调用
-   printf("c=%d",c);
+    //init the system
+    init_system();
+    // mysql_query(mysql,"select * from admin");
+    // printf("search...\n");
+    // if(search_mysql(mysql,"SELECT * FROM admin WHERE id=95001"))
+    //     printf("wrong!\n");
 
-   return 0;   
+    // display_mysql(mysql_store_result(mysql));
+
+    //loading the UI
+    UI(SYSTEM_NAME);
+
+    //close the DB
+    if (!close_mysql(mysql))
+        printf("DB closed success!\n");
+    return 0;
 }

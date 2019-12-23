@@ -4,6 +4,8 @@
 
 #include <stdio.h>
 
-void    print_hello    (void);
+#define c 100
+
 int add(int a,int b);
+
 #endif

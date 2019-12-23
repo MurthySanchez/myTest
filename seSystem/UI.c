@@ -1,11 +1,24 @@
+#include "UI.h"
+#include "mymysql.h"
 #include "gtk/gtk.h"
 #include "stdio.h"
 #include "stdlib.h"
-#include "mymysql.h"
-#include "UI.h"
+#include "string.h"
 
 #define WIDTH 846
 #define HEIGHT 600
+
+struct Input
+{
+    const gchar *id;
+    const gchar *passwd;
+    char searchId[128];
+    char searchPasswd[256];
+} Input;
+
+GtkWidget *entryUser, *entryPW; //entry
+
+extern MYSQL* mysql;
 /*UI界面最新进展
  * 窗口搭建完成 846*600
  * 退出按钮ok
@@ -14,15 +27,8 @@
  * 添加label用户名，密码
  * 添加用户名输入框，密码输入框（不可见）
  * 添加bj
+ * 
  * */
-
-struct Input
-{
-    const gchar *username;
-    const gchar *passwd;
-} Input;
-
-GtkWidget *entryUser, *entryPW; //entry
 
 void delete_event(GtkWidget *widget, GdkEvent *event, gpointer data)
 {
@@ -42,21 +48,44 @@ void enter_callback(GtkWidget *widget, GtkWidget *entry)
     entry_text = gtk_entry_get_text(GTK_ENTRY(entry));
     printf("Entry contents: %s\n", entry_text);
 }
-
-void callBack(GtkWidget *widget, gpointer data)
+/**
+ * 登陆按钮事件
+ * */
+void callBack(GtkWidget *widget, GtkWidget *button)
 {
-    /*get input username and passwd*/
-    Input.username = gtk_entry_get_text(GTK_ENTRY(entryUser));
-    printf("username is %s\n", Input.username);
+    /*get input id and passwd*/
+    Input.id = gtk_entry_get_text(GTK_ENTRY(entryUser));
+    printf("id is %s\n", Input.id);
     Input.passwd = gtk_entry_get_text(GTK_ENTRY(entryPW));
     printf("passwd is %s\n", Input.passwd);
-
-    /*connect db*/
+    if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button)))
+        sprintf(Input.searchId,"SELECT * FROM admin WHERE id=%s",Input.id);
+        // printf("yes\n");
+    else
+    {
+        sprintf(Input.searchId,"SELECT * FROM user WHERE id=%s",Input.id);
+        // printf("no!\n");
+    }
+    
+    
+    
+    sprintf(Input.searchPasswd,"%s and passwd='%s'",Input.searchId,Input.passwd);
+    /*search db*/
     /*********************/
-    if(!connect_mysql())
-        printf("Connected MySQL successful! \n");
-    if(!close_mysql())
-        printf("DB closed success!\n");
+    if(search_mysql(mysql,Input.searchId)){
+        printf("cannot find the people\n");
+    }
+    else{
+        printf("%s trying online.\n",Input.id);
+        if(search_mysql(mysql,Input.searchPasswd)){
+            printf("wrong passwd!\n");
+        }
+        else
+        {
+            printf("Successful log in!\n");
+        }
+        
+    }
     /*********************/
 }
 
@@ -93,12 +122,13 @@ void change_background(GtkWidget *widget, int w, int h, const gchar *path)
 int UI(char *name)
 {
     GtkWidget *window; //定义窗口
-    GtkWidget *button; //定义按钮
+    GtkWidget *button,*radio1,*radio2; //定义按钮
     GtkWidget *table;  //定义table
     GtkWidget *image;  //image
     GtkWidget *frame;  //frame
     GtkWidget *label;  //label
     GtkWidget *check;  //check
+    GSList *group;
 
     gtk_init(NULL, NULL); //初始化
 
@@ -169,12 +199,25 @@ int UI(char *name)
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check), FALSE);
     /*********************/
 
+    /*选择登陆身份*/
+    /*********************/    
+    radio1=gtk_radio_button_new_with_label(NULL,"管理员");
+    gtk_table_attach_defaults(GTK_TABLE(table),radio1,11,14,12,13);
+    // gtk_signal_connect(GTK_OBJECT(radio1),"released",G_CALLBACK(radio_clicked),(gpointer)1);
+
+    group=gtk_radio_button_get_group(GTK_RADIO_BUTTON(radio1));
+    
+    radio2=gtk_radio_button_new_with_label(group,"职工");
+    gtk_table_attach_defaults(GTK_TABLE(table),radio2,15,17,12,13);
+    // gtk_signal_connect(GTK_OBJECT(radio2),"released",G_CALLBACK(radio_clicked),(gpointer)2);
+    /*********************/
+
     /*登陆按钮*/
     /*********************/
     button = gtk_button_new_with_label("登陆");
     // g_signal_connect(G_OBJECT(button),"clicked",G_CALLBACK(delete_event),window);
     gtk_table_attach_defaults(GTK_TABLE(table), button, 11, 17, 14, 15);
-    g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(callBack), NULL);
+    g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(callBack), radio1);
     gtk_widget_show(button); //显示按钮
     /*********************/
 
@@ -198,10 +241,4 @@ int UI(char *name)
     gtk_main();                  //gtk+2.0等待事件(如键盘事件或鼠标事件) 的发生
 
     return FALSE;
-}
-
-int main()
-{
-    char *name = "Company Attendance System";
-    UI(name);
 }

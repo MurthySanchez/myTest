@@ -8,7 +8,9 @@
 #include <mysql/mysql.h>
 #include "config.h"
 
-int connect_mysql();
-int close_mysql();
+void display_mysql(MYSQL_RES *res);
+int search_mysql(MYSQL *mysql, const char *str);
+int connect_mysql(MYSQL *mysql);
+int close_mysql(MYSQL *mysql);
 
 #endif
