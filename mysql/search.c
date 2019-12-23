@@ -32,12 +32,12 @@ int main()
     {
         printf("Options Set ERRO!\n");
     }
-    conn_ptr = mysql_real_connect(conn_ptr,"localhost","root","aabbcc","testdb",0,NULL,0);//连接MySQL testdb数据库
+    conn_ptr = mysql_real_connect(conn_ptr,"localhost","root","123456","test_db",0,NULL,0);//连接MySQL testdb数据库
     if(conn_ptr)
     {
         printf("Connection Succeed!\n");
 
-        ret = mysql_query(conn_ptr,"SELECT childno,fname,age FROM children WHERE age > 5"); //执行SQL语句,查找大于5岁的孩子
+        ret = mysql_query(conn_ptr,"select * from Student"); //执行SQL语句,查找大于5岁的孩子
         if(!ret)
         {
             res_ptr = mysql_use_result(conn_ptr);
