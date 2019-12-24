@@ -16,9 +16,10 @@ struct Input
     char searchPasswd[256];
 } Input;
 
-GtkWidget *entryUser, *entryPW; //entry
+GtkWidget *main_window, s_window; //定义窗口
+GtkWidget *entryUser, *entryPW;   //entry
 
-extern MYSQL* mysql;
+extern MYSQL *mysql;
 /*UI界面最新进展
  * 窗口搭建完成 846*600
  * 退出按钮ok
@@ -27,7 +28,8 @@ extern MYSQL* mysql;
  * 添加label用户名，密码
  * 添加用户名输入框，密码输入框（不可见）
  * 添加bj
- * 
+ * 数据库连接成功，数据可操作
+ * 添加对话框
  * */
 
 void delete_event(GtkWidget *widget, GdkEvent *event, gpointer data)
@@ -48,108 +50,121 @@ void enter_callback(GtkWidget *widget, GtkWidget *entry)
     entry_text = gtk_entry_get_text(GTK_ENTRY(entry));
     printf("Entry contents: %s\n", entry_text);
 }
+
+GtkWidget *new_dialog(GtkWidget *widget, GtkMessageType type, const gchar *msg)
+{
+    GtkWidget *dialog;
+    dialog = gtk_message_dialog_new(NULL,
+                                    GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+                                    type,
+                                    GTK_BUTTONS_OK,
+                                    msg);
+    gtk_dialog_run(GTK_DIALOG(dialog));
+    gtk_widget_destroy(dialog);
+    return dialog;
+}
+
+/**
+ * 函数功能：建一个新窗口
+ * 传入参数：对象（管理员或员工）
+ * */
+void new_window()
+{
+    GtkWidget *s_window;
+    GtkWidget *button;
+    s_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+    g_signal_connect(G_OBJECT(s_window), "delete_event", G_CALLBACK(delete_event), NULL);
+    g_signal_connect(G_OBJECT(s_window), "destroy", G_CALLBACK(gtk_main_quit), NULL);
+    gtk_container_set_border_width(GTK_CONTAINER(s_window), 10);
+
+    button = gtk_button_new_with_label("Hello world !");
+    // g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(hello), "1");
+    gtk_container_add(GTK_CONTAINER(s_window), button);
+
+    gtk_widget_show(button);
+    gtk_widget_show(s_window);
+
+    g_print("Hello World\n"); //temp(data );
+}
+
 /**
  * 登陆按钮事件
  * */
 void callBack(GtkWidget *widget, GtkWidget *button)
 {
+    GtkWidget *dialog;
+    gboolean choice;
+    char ch[2][6] = {"user", "admin"}; //0:user,1:admin
     /*get input id and passwd*/
     Input.id = gtk_entry_get_text(GTK_ENTRY(entryUser));
     printf("id is %s\n", Input.id);
     Input.passwd = gtk_entry_get_text(GTK_ENTRY(entryPW));
     printf("passwd is %s\n", Input.passwd);
-    if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button)))
-        sprintf(Input.searchId,"SELECT * FROM admin WHERE id=%s",Input.id);
-        // printf("yes\n");
+    if ((choice = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button))))
+        sprintf(Input.searchId, "SELECT * FROM admin WHERE id=%s", Input.id); //admin table search
+    // printf("yes\n");
     else
     {
-        sprintf(Input.searchId,"SELECT * FROM user WHERE id=%s",Input.id);
+        sprintf(Input.searchId, "SELECT * FROM user WHERE id=%s", Input.id); //user table search
         // printf("no!\n");
     }
-    
-    
-    
-    sprintf(Input.searchPasswd,"%s and passwd='%s'",Input.searchId,Input.passwd);
+
+    sprintf(Input.searchPasswd, "%s and passwd='%s'", Input.searchId, Input.passwd);
     /*search db*/
     /*********************/
-    if(search_mysql(mysql,Input.searchId)){
+    if (search_mysql(mysql, Input.searchId))
+    {
+        dialog = new_dialog(NULL, GTK_MESSAGE_ERROR, "用户名错误！");
         printf("cannot find the people\n");
     }
-    else{
-        printf("%s trying online.\n",Input.id);
-        if(search_mysql(mysql,Input.searchPasswd)){
+    else
+    {
+        printf("%s trying online.\n", Input.id);
+        if (search_mysql(mysql, Input.searchPasswd))
+        {
+            dialog = new_dialog(NULL, GTK_MESSAGE_ERROR, "密码错误！");
             printf("wrong passwd!\n");
         }
         else
         {
-            printf("Successful log in!\n");
+            printf("%s %s successful logged in!\n", ch[choice], Input.id);
+            gtk_widget_hide_all(main_window);
+            new_window();
         }
-        
     }
-    /*********************/
 }
-
-void change_background(GtkWidget *widget, int w, int h, const gchar *path)
-{
-    //1.允许窗口可以绘图
-    gtk_widget_set_app_paintable(widget, TRUE);
-    gtk_widget_realize(widget);
-
-    /* 更改背景图时，图片会重叠 
-	* 这时要手动调用下面的函数，让窗口绘图区域失效，产生窗口重绘制事件（即 expose 事件）。 
-	*/
-    gtk_widget_queue_draw(widget);
-    GdkPixbuf *src = gdk_pixbuf_new_from_file(path, NULL);
-    GdkPixbuf *dst = gdk_pixbuf_scale_simple(src, w, h, GDK_INTERP_BILINEAR);
-
-    /* 创建pixmap图像;  
-	* NULL：不需要蒙版;  
-	* 123： 0~255，透明到不透明 
-	*/
-    GdkPixmap *pixmap = NULL;
-    gdk_pixbuf_render_pixmap_and_mask(dst, &pixmap, NULL, 255);
-
-    // 通过pixmap给widget设置一张背景图，最后一个参数必须为: FASL
-    gdk_window_set_back_pixmap(widget->window, pixmap, FALSE);
-
-    g_object_unref(src);
-    g_object_unref(dst);
-    g_object_unref(pixmap);
-
-    return;
-}
+/*********************/
 
 int UI(char *name)
 {
-    GtkWidget *window; //定义窗口
-    GtkWidget *button,*radio1,*radio2; //定义按钮
-    GtkWidget *table;  //定义table
-    GtkWidget *image;  //image
-    GtkWidget *frame;  //frame
-    GtkWidget *label;  //label
-    GtkWidget *check;  //check
+    GtkWidget *button, *radio1, *radio2; //定义按钮
+    GtkWidget *table;                    //定义table
+    GtkWidget *image;                    //image
+    GtkWidget *frame;                    //frame
+    GtkWidget *label;                    //label
+    GtkWidget *check;                    //check
     GSList *group;
 
     gtk_init(NULL, NULL); //初始化
 
     /*窗口初始化*/
     /*********************/
-    window = gtk_window_new(GTK_WINDOW_TOPLEVEL);       //创建一个置顶窗口
-    gtk_window_set_title(GTK_WINDOW(window), name);     //设置标题
-    gtk_widget_set_size_request(window, WIDTH, HEIGHT); //设置大小
-    // gtk_window_set_default_size(GTK_WINDOW(window),WIDTH,HEIGHT);    //设置大小
-    gtk_window_set_resizable(GTK_WINDOW(window), FALSE);
-    gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER); //设置窗口位置
-    gtk_container_set_border_width(GTK_CONTAINER(window), 0);        //设置窗口边框宽度
-    // change_background(window, WIDTH, HEIGHT*1.5, "./image/bj.jpg");  //设置窗口背景图片
+    main_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);       //创建一个置顶窗口
+    gtk_window_set_title(GTK_WINDOW(main_window), name);     //设置标题
+    gtk_widget_set_size_request(main_window, WIDTH, HEIGHT); //设置大小
+    // gtk_window_set_default_size(GTK_WINDOW(main_window),WIDTH,HEIGHT);    //设置大小
+    gtk_window_set_resizable(GTK_WINDOW(main_window), FALSE);
+    gtk_window_set_position(GTK_WINDOW(main_window), GTK_WIN_POS_CENTER); //设置窗口位置
+    gtk_container_set_border_width(GTK_CONTAINER(main_window), 0);        //设置窗口边框宽度
+    // change_background(main_window, WIDTH, HEIGHT*1.5, "./image/bj.jpg");  //设置窗口背景图片
     // image=gtk_image_new_from_file("./image/bj2.PNG");
-    // gtk_container_add(GTK_CONTAINER(window),image);
-    g_signal_connect(G_OBJECT(window), "destroy", G_CALLBACK(gtk_main_quit), NULL); //事件监听，检测用户关闭windows时窗口关闭
+    // gtk_container_add(GTK_CONTAINER(main_window),image);
+    g_signal_connect(G_OBJECT(main_window), "destroy", G_CALLBACK(gtk_main_quit), NULL); //事件监听，检测用户关闭windows时窗口关闭
     /*********************/
 
-    /*control window widget -->frame*/
+    /*control main_window widget -->frame*/
     frame = gtk_frame_new("");
-    gtk_container_add(GTK_CONTAINER(window), frame);
+    gtk_container_add(GTK_CONTAINER(main_window), frame);
 
     /*********************/
     table = gtk_table_new(19, 27, TRUE);
@@ -200,23 +215,24 @@ int UI(char *name)
     /*********************/
 
     /*选择登陆身份*/
-    /*********************/    
-    radio1=gtk_radio_button_new_with_label(NULL,"管理员");
-    gtk_table_attach_defaults(GTK_TABLE(table),radio1,11,14,12,13);
+    /*********************/
+    radio1 = gtk_radio_button_new_with_label(NULL, "管理员");
+    gtk_table_attach_defaults(GTK_TABLE(table), radio1, 11, 14, 12, 13);
     // gtk_signal_connect(GTK_OBJECT(radio1),"released",G_CALLBACK(radio_clicked),(gpointer)1);
 
-    group=gtk_radio_button_get_group(GTK_RADIO_BUTTON(radio1));
-    
-    radio2=gtk_radio_button_new_with_label(group,"职工");
-    gtk_table_attach_defaults(GTK_TABLE(table),radio2,15,17,12,13);
+    group = gtk_radio_button_get_group(GTK_RADIO_BUTTON(radio1));
+
+    radio2 = gtk_radio_button_new_with_label(group, "职工");
+    gtk_table_attach_defaults(GTK_TABLE(table), radio2, 15, 17, 12, 13);
     // gtk_signal_connect(GTK_OBJECT(radio2),"released",G_CALLBACK(radio_clicked),(gpointer)2);
     /*********************/
 
     /*登陆按钮*/
     /*********************/
     button = gtk_button_new_with_label("登陆");
-    // g_signal_connect(G_OBJECT(button),"clicked",G_CALLBACK(delete_event),window);
+    // g_signal_connect(G_OBJECT(button),"clicked",G_CALLBACK(delete_event),main_window);
     gtk_table_attach_defaults(GTK_TABLE(table), button, 11, 17, 14, 15);
+    // g_signal_connect(GtkWidget(main_window), )
     g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(callBack), radio1);
     gtk_widget_show(button); //显示按钮
     /*********************/
@@ -224,7 +240,7 @@ int UI(char *name)
     /*退出按钮*/
     /*********************/
     button = gtk_button_new_with_label("退出系统");
-    g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(delete_event), window);
+    g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(delete_event), main_window);
     gtk_table_attach_defaults(GTK_TABLE(table), button, 23, 26, 16, 17);
     gtk_widget_show(button); //显示按钮
     /*********************/
@@ -237,8 +253,8 @@ int UI(char *name)
     /*********************/
 
     gtk_widget_show(table);
-    gtk_widget_show_all(window); //显示窗口(all)
-    gtk_main();                  //gtk+2.0等待事件(如键盘事件或鼠标事件) 的发生
+    gtk_widget_show_all(main_window); //显示窗口(all)
+    gtk_main();                       //gtk+2.0等待事件(如键盘事件或鼠标事件) 的发生
 
     return FALSE;
 }
