@@ -8,21 +8,22 @@
 #define SYSTEM_NAME "Company Attendance System"
 
 /*全局变量*/
-MYSQL* mysql;
+MYSQL *mysql;
 
 /**************
  * 初始化系统
  * *************/
-int init_system(){
-    if (!(mysql=mysql_init(NULL)))
+int init_system()
+{
+    if (!(mysql = mysql_init(NULL)))
     { //分配和初始化MYSQL对象
         printf("mysql_init(): %s\n", mysql_error(mysql));
         return -1;
     }
-    if (connect_mysql(mysql)==0)
+    if (connect_mysql(mysql) == 0)
         printf("Connected MySQL successful! \n");
-    
-    return 0;    
+
+    return 0;
 }
 
 /*************
