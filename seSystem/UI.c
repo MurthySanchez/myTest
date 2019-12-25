@@ -1,4 +1,5 @@
 #include "UI.h"
+#include "function.h"
 #include "mymysql.h"
 #include "gtk/gtk.h"
 #include "stdio.h"
@@ -85,7 +86,6 @@ void go_back_to_firstPage(GtkWidget *widget, GtkWidget *button)
     first_page();
 }
 
-
 /**
  * 搜索员工信息表
  * 找出员工：姓名，年龄，电话，性别，照片信息，考勤开始，考勤结束时间
@@ -108,10 +108,12 @@ void main_page(int user)
     GtkWidget *label;
     GtkWidget *button;
     GtkWidget *image;
+    GtkWidget *text_view;
+
     /*窗口初始化*/
     /*********************/
     s_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-    gtk_window_set_title(GTK_WINDOW(s_window), sys_name); //设置标题
+    gtk_window_set_title(GTK_WINDOW(s_window), sys_name);     //设置标题
     gtk_widget_set_size_request(s_window, M_WIDTH, M_HEIGHT); //设置大小
     gtk_window_set_resizable(GTK_WINDOW(s_window), FALSE);
     gtk_window_set_position(GTK_WINDOW(s_window), GTK_WIN_POS_CENTER);                //设置窗口位置
@@ -154,9 +156,9 @@ void main_page(int user)
     if (user == 0)
     {
         /*********************/
-        vbox = gtk_vbox_new(FALSE, 0);
-        gtk_container_set_border_width(GTK_CONTAINER(vbox), 5);
-        gtk_table_attach_defaults(GTK_TABLE(table), vbox, 2, 21, 6, 15);
+        // vbox = gtk_vbox_new(FALSE, 0);
+        // gtk_container_set_border_width(GTK_CONTAINER(vbox), 5);
+        // gtk_table_attach_defaults(GTK_TABLE(table), vbox, 2, 21, 6, 15);
 
         ////function one////
         frame = gtk_frame_new("温馨提示");
@@ -168,43 +170,50 @@ void main_page(int user)
         gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_LEFT);
         // gtk_label_set_line_wrap(GTK_LABEL(label), TRUE);
         gtk_container_add(GTK_CONTAINER(frame), label);
+        gtk_table_attach_defaults(GTK_TABLE(table), frame, 2, 21, 6, 8);
 
         ////function two////
-        hbox = gtk_hbox_new(FALSE, 0);
-        gtk_container_set_border_width(GTK_CONTAINER(hbox), 5);
-        gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 5);
+        // hbox = gtk_hbox_new(FALSE, 0);
+        // gtk_container_set_border_width(GTK_CONTAINER(hbox), 5);
+        // gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 5);
 
         frame = gtk_frame_new("通知");
-        gtk_box_pack_start(GTK_BOX(hbox), frame, FALSE, FALSE, 5);
+        // gtk_box_pack_start(GTK_BOX(hbox), frame, FALSE, FALSE, 5);
+        gtk_table_attach_defaults(GTK_TABLE(table), frame, 2, 9, 9, 18);
         char notice[HUGE] = {"1.weidalfjljfljd\n2.dajfkjdls"};
         label = gtk_label_new(notice);
         gtk_label_set_line_wrap(GTK_LABEL(label), TRUE);
         gtk_container_add(GTK_CONTAINER(frame), label);
 
+
         ////function three////
         frame = gtk_frame_new("考勤信息查询");
-        gtk_box_pack_start(GTK_BOX(hbox), frame, FALSE, FALSE, 140);
+        // gtk_box_pack_start(GTK_BOX(hbox), frame, FALSE, FALSE, 140);
+        gtk_table_attach_defaults(GTK_TABLE(table), frame, 11, 21, 9, 18);
+
 
         /*********************/
     }
     else
     {
         /*********************/
-        hbox = gtk_hbox_new(FALSE, 0);
-        gtk_container_set_border_width(GTK_CONTAINER(hbox), 5);
-        gtk_table_attach_defaults(GTK_TABLE(table), hbox, 2, 21, 6, 15);
+        // hbox = gtk_hbox_new(FALSE, 0);
+        // gtk_container_set_border_width(GTK_CONTAINER(hbox), 5);
+        // gtk_table_attach_defaults(GTK_TABLE(table), hbox, 2, 21, 6, 15);
 
-        vbox = gtk_vbox_new(FALSE, 0);
-        gtk_container_set_border_width(GTK_CONTAINER(vbox), 5);
-        gtk_box_pack_start(GTK_BOX(hbox), vbox, FALSE, FALSE, 5);
+        // vbox = gtk_vbox_new(FALSE, 0);
+        // gtk_container_set_border_width(GTK_CONTAINER(vbox), 5);
+        // gtk_box_pack_start(GTK_BOX(hbox), vbox, FALSE, FALSE, 5);
 
         ////function one////
         frame = gtk_frame_new("发布通知");
-        gtk_box_pack_start(GTK_BOX(vbox), frame, FALSE, FALSE, 5);
+        // gtk_box_pack_start(GTK_BOX(vbox), frame, FALSE, FALSE, 5);
+        gtk_table_attach_defaults(GTK_TABLE(table), frame, 2, 11, 6, 8);
         vbox_f = gtk_vbox_new(FALSE, 0);
         gtk_container_add(GTK_CONTAINER(frame), vbox_f);
-        entry = gtk_entry_new();
-        gtk_box_pack_start(GTK_BOX(vbox_f), entry, FALSE, FALSE, 5);
+        text_view = gtk_text_view_new();
+        gtk_widget_set_size_request(text_view, 250, 100);
+        gtk_box_pack_start(GTK_BOX(vbox_f), text_view, FALSE, FALSE, 5);
         // g_signal_connect();
         button = gtk_button_new_with_label("发布");
         gtk_box_pack_start(GTK_BOX(vbox_f), button, FALSE, FALSE, 10);
@@ -212,24 +221,29 @@ void main_page(int user)
 
         ////function two////
         frame = gtk_frame_new("员工信息查询");
-        gtk_box_pack_start(GTK_BOX(vbox), frame, FALSE, FALSE, 40);
-        
+        gtk_table_attach_defaults(GTK_TABLE(table), frame, 2, 11, 10, 18);
+        // gtk_box_pack_start(GTK_BOX(vbox), frame, TRUE, TRUE, 40);
+        vbox = admin_functionTwo(s_window);
+        gtk_container_add(GTK_CONTAINER(frame), vbox);
 
         ////function three///
         frame = gtk_frame_new("员工考勤信息");
-        gtk_box_pack_start(GTK_BOX(hbox), frame, FALSE, FALSE, 300);
+        gtk_table_attach_defaults(GTK_TABLE(table), frame, 12, 25, 6, 18);
+        // gtk_box_pack_start(GTK_BOX(hbox), frame, TRUE, TRUE, 300);
     }
 
     /*退出登陆&&退出系统*/
     /*********************/
-    button = gtk_button_new_with_label("退出登陆");
+    button = create_button(GTK_STOCK_HOME);
+    // gtk_tooltips_set_tip(GTK_TOOLTIPS(button_tips), button, "退出回到首页", "首页");
     g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(go_back_to_firstPage), s_window);
-    gtk_table_attach_defaults(GTK_TABLE(table), button, 25,27, 16, 17);
+    gtk_table_attach_defaults(GTK_TABLE(table), button, 26, 27, 16, 17);
 
     ////exit the system////
-    button = gtk_button_new_with_label("退出系统");
+    button = create_button(GTK_STOCK_QUIT);
+    // gtk_tooltips_set_tip(GTK_TOOLTIPS(button_tips), button, "退出系统", "退出");
     g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(delete_event), s_window);
-    gtk_table_attach_defaults(GTK_TABLE(table), button, 25,27, 18, 19);
+    gtk_table_attach_defaults(GTK_TABLE(table), button, 26, 27, 18, 19);
     /*********************/
 
     /*function 4*/
