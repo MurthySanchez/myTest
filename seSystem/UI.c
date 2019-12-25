@@ -3,7 +3,6 @@
 #include "mymysql.h"
 #include "gtk/gtk.h"
 #include "stdio.h"
-#include "stdlib.h"
 #include "string.h"
 #include "time.h"
 
@@ -90,9 +89,19 @@ void go_back_to_firstPage(GtkWidget *widget, GtkWidget *button)
  * 搜索员工信息表
  * 找出员工：姓名，年龄，电话，性别，照片信息，考勤开始，考勤结束时间
  * */
-void ready_for_personal_information()
+void get_personal_inform(char* user)
 {
-    // search_mysql(mysql,);
+    MYSQL_ROW row;
+    int i;
+    int rows=mysql_num_rows(res);
+    int fields=mysql_num_fields(res);
+    // char sql[MID];//
+    // snprintf(sql,MID,"%s");
+    search_mysql(mysql,"select name,sex,age,image from employee where id='147001'");
+    
+    printf("\n");
+    getchar();
+
 }
 
 /**
@@ -143,7 +152,7 @@ void main_page(int user)
     gtk_container_add(GTK_CONTAINER(frame), hbox);
 
     // char src_image[SMALL] = {"./image/person/apple.jpeg"};
-    image = gtk_image_new_from_file(employee.src_image);
+    image = gtk_image_new_from_file(employee.image);
     gtk_box_pack_start(GTK_BOX(hbox), image, FALSE, FALSE, 5);
 
     char welcm_lebel[SMALL];
@@ -303,6 +312,7 @@ void callBack(GtkWidget *widget, GtkWidget *button)
         {
             printf("%s %s successful logged in!\n", ch[choice], Input.id);
             gtk_widget_hide_all(main_window);
+            get_personal_inform(ch[choice]);
             main_page(choice);
         }
     }
@@ -434,7 +444,8 @@ int UI(char *name)
     gtk_init(NULL, NULL); //初始化
 
     // first_page();
-    main_page(1);
+    // main_page(1);
+    get_personal_inform("user");
 
     gtk_main(); //gtk+2.0等待事件(如键盘事件或鼠标事件) 的发生
 }

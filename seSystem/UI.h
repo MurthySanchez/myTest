@@ -9,18 +9,25 @@
 
 #define WIDTH 846
 #define HEIGHT 600
-#define M_WIDTH 1600    //w main_page
-#define M_HEIGHT    900 //h main_page
+#define M_WIDTH 1600 //w main_page
+#define M_HEIGHT 900 //h main_page
 #define SMALL 64
 #define MID 128
 #define HUGE 256
 
+
+//外部变量
+extern MYSQL *mysql;
+extern MYSQL_RES *res;
+
+/*输入信息*/
 struct Input
 {
     const gchar *id;
     const gchar *passwd;
 } Input;
 
+/*由输入信息生成搜索语句*/
 struct Output
 {
     char searchId[MID];
@@ -31,16 +38,12 @@ struct Output
 struct employee
 {
     char name[10];
-    short age;
-    char phone[11];
     char sex[2];
-    char src_image[SMALL];
+    short age;
+    char image[SMALL];
     char start_time[40];
     char end_time[40];
 } employee;
-
-//外部变量
-extern MYSQL *mysql;
 
 //全局变量
 GtkWidget *main_window, *s_window; //定义窗口
