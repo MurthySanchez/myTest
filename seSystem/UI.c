@@ -85,6 +85,7 @@ void go_back_to_firstPage(GtkWidget *widget, GtkWidget *button)
     first_page();
 }
 
+
 /**
  * 搜索员工信息表
  * 找出员工：姓名，年龄，电话，性别，照片信息，考勤开始，考勤结束时间
@@ -111,7 +112,7 @@ void main_page(int user)
     /*********************/
     s_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     gtk_window_set_title(GTK_WINDOW(s_window), sys_name); //设置标题
-    gtk_widget_set_size_request(s_window, WIDTH, HEIGHT); //设置大小
+    gtk_widget_set_size_request(s_window, M_WIDTH, M_HEIGHT); //设置大小
     gtk_window_set_resizable(GTK_WINDOW(s_window), FALSE);
     gtk_window_set_position(GTK_WINDOW(s_window), GTK_WIN_POS_CENTER);                //设置窗口位置
     gtk_container_set_border_width(GTK_CONTAINER(s_window), 0);                       //设置窗口边框宽度
@@ -212,23 +213,23 @@ void main_page(int user)
         ////function two////
         frame = gtk_frame_new("员工信息查询");
         gtk_box_pack_start(GTK_BOX(vbox), frame, FALSE, FALSE, 40);
-        ///...
+        
 
         ////function three///
         frame = gtk_frame_new("员工考勤信息");
-        gtk_box_pack_start(GTK_BOX(hbox), frame, FALSE, FALSE, 130);
+        gtk_box_pack_start(GTK_BOX(hbox), frame, FALSE, FALSE, 300);
     }
 
     /*退出登陆&&退出系统*/
     /*********************/
     button = gtk_button_new_with_label("退出登陆");
     g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(go_back_to_firstPage), s_window);
-    gtk_table_attach_defaults(GTK_TABLE(table), button, 22, 25, 14, 15);
+    gtk_table_attach_defaults(GTK_TABLE(table), button, 25,27, 16, 17);
 
     ////exit the system////
     button = gtk_button_new_with_label("退出系统");
     g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(delete_event), s_window);
-    gtk_table_attach_defaults(GTK_TABLE(table), button, 22, 25, 16, 17);
+    gtk_table_attach_defaults(GTK_TABLE(table), button, 25,27, 18, 19);
     /*********************/
 
     /*function 4*/

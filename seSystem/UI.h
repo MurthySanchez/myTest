@@ -9,6 +9,8 @@
 
 #define WIDTH 846
 #define HEIGHT 600
+#define M_WIDTH 1600    //w main_page
+#define M_HEIGHT    900 //h main_page
 #define SMALL 64
 #define MID 128
 #define HUGE 256
