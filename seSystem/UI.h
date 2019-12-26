@@ -15,7 +15,6 @@
 #define MID 128
 #define HUGE 256
 
-
 //外部变量
 extern MYSQL *mysql;
 extern MYSQL_RES *res;
@@ -34,21 +33,21 @@ struct Output
     char searchPasswd[HUGE];
 } Output;
 
-/*姓名，年龄，电话，性别，照片信息，考勤开始，考勤结束时间*/
-struct employee
+/*考勤开始，考勤结束时间*/
+struct record
 {
-    char name[10];
-    char sex[2];
-    short age;
-    char image[SMALL];
     char start_time[40];
     char end_time[40];
-} employee;
+} record;
 
 //全局变量
 GtkWidget *main_window, *s_window; //定义窗口
 GtkWidget *entryUser, *entryPW;    //entry
 char sys_name[SMALL];
+char *admin_image;
+GtkTextBuffer *buffer; //文本框缓冲区
+GtkTextIter *Iter;
+result_from_mysql *p; //存放搜索结果
 
 void first_page();
 void main_page(int user);

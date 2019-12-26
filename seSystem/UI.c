@@ -74,34 +74,81 @@ void new_dialog(GtkWidget *widget, GtkMessageType type, const gchar *msg)
     // return dialog;
 }
 
-void go_back_to_firstPage(GtkWidget *widget, GtkWidget *button)
+void go_back_to_firstPage(GtkWidget *widget, gpointer data)
 {
     char message[MID];
     printf("user exit the system.\n");
     gtk_widget_hide_all(s_window);
-    sprintf(employee.end_time, "%s", get_current_time());
-    snprintf(message, sizeof(message), "现在时间是%s，您已成功登出。\n已将结束时间计入考勤表中，您可自行查阅。", employee.end_time);
-    new_dialog(main_window, GTK_MESSAGE_INFO, message);
+    if (data == 0)
+    {
+        sprintf(record.end_time, "%s", get_current_time());
+        snprintf(message, sizeof(message), "现在时间是%s，您已成功登出。\n已将结束时间计入考勤表中，您可自行查阅。", record.end_time);
+        new_dialog(main_window, GTK_MESSAGE_INFO, message);
+    }
     first_page();
+}
+
+void update_inform(GtkWidget *widget, gpointer data)
+{
+    GtkWidget *window;
+    window = create_addwin(s_window);
 }
 
 /**
  * 搜索员工信息表
  * 找出员工：姓名，年龄，电话，性别，照片信息，考勤开始，考勤结束时间
  * */
-void get_personal_inform(char* user)
+void get_personal_inform(int choice)
 {
-    MYSQL_ROW row;
-    int i;
-    int rows=mysql_num_rows(res);
-    int fields=mysql_num_fields(res);
-    // char sql[MID];//
-    // snprintf(sql,MID,"%s");
-    search_mysql(mysql,"select name,sex,age,image from employee where id='147001'");
-    
-    printf("\n");
-    getchar();
+    char sql[MID];
+    if (choice == 0)
+    {
+        snprintf(sql, MID, "select * from employee where id='%s'", Input.id);
+        p = get_results_from_mysql(mysql, sql);
+        printf("get_personal_inform() as follow\n");
+        while (p->r_e->next != NULL)
+        {
+            p->r_e = p->r_e->next;
+            printf("%s\t%s\t%s\t%s\t%s\t", p->r_e->id,p->r_e->name,p->r_e->age,p->r_e->image);
+        }
+        printf("\n");
 
+        // // snprintf(sql, MID, , Input.id);
+        // // search_mysql(mysql, sql);
+
+        // employee.name = get_inform_form_mysql(mysql, "select name from employee where id=", Input.id);
+        // // mysql_free_result(res);
+        // // printf("name %s\n", employee.name);
+
+        // // snprintf(sql, MID, "select sex from employee where id='%s'", Input.id);
+        // // search_mysql(mysql, sql);
+        // employee.sex = get_inform_form_mysql(mysql, "select sex from employee where id=", Input.id);
+        // // printf("sex %s\n", employee.sex);
+
+        // // snprintf(sql, MID, "select age from employee where id='%s'", Input.id);
+        // // search_mysql(mysql, sql);
+        // employee.age = get_inform_form_mysql(mysql, "select age from employee where id=", Input.id);
+        // // printf("age %s\n", employee.age);
+
+        // // snprintf(sql, MID, "select image from employee where id='%s'", Input.id);
+        // // search_mysql(mysql, sql);
+        // employee.image = get_inform_form_mysql(mysql, "select image from employee where id=", Input.id);
+        // printf("name %s,sex %s,age %s,image %s\n", employee.name, employee.sex, employee.age, employee.image);
+    }
+    else
+    {
+        admin_image = "./image/person/robot.jpg";
+    }
+}
+
+void send_notify(GtkWidget *widget, gpointer *data)
+{
+    const gchar *text;
+    GtkTextIter start, end;
+    gtk_text_buffer_get_bounds(GTK_TEXT_BUFFER(buffer), &start, &end);
+    gtk_text_buffer_get_text(GTK_TEXT_BUFFER(buffer), &start, &end, FALSE);
+    g_print("%s\n", text);
+    new_dialog(s_window, GTK_MESSAGE_INFO, "发布成功");
 }
 
 /**
@@ -117,7 +164,10 @@ void main_page(int user)
     GtkWidget *label;
     GtkWidget *button;
     GtkWidget *image;
+    GtkWidget *event_box;
     GtkWidget *text_view;
+
+    // gchar **titles;
 
     /*窗口初始化*/
     /*********************/
@@ -144,21 +194,36 @@ void main_page(int user)
 
     /*card*/
     /*********************/
+    event_box = gtk_event_box_new();
+    gtk_widget_set_events(event_box, GDK_BUTTON_PRESS_MASK);
+    gtk_table_attach_defaults(GTK_TABLE(table), event_box, 20, 25, 2, 5);
     frame = gtk_frame_new(NULL);
-    gtk_table_attach_defaults(GTK_TABLE(table), frame, 20, 25, 2, 5);
+    gtk_container_add(GTK_CONTAINER(event_box), frame);
 
     hbox = gtk_hbox_new(FALSE, 0);
     gtk_container_set_border_width(GTK_CONTAINER(hbox), 5);
     gtk_container_add(GTK_CONTAINER(frame), hbox);
 
     // char src_image[SMALL] = {"./image/person/apple.jpeg"};
-    image = gtk_image_new_from_file(employee.image);
-    gtk_box_pack_start(GTK_BOX(hbox), image, FALSE, FALSE, 5);
-
     char welcm_lebel[SMALL];
-    sprintf(welcm_lebel, "欢迎您，\n%s", Input.id);
-    label = gtk_label_new(welcm_lebel);
-    gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 5);
+    if (user == 0)
+    {
+        image = gtk_image_new_from_file(p->r_e->image);
+        gtk_box_pack_start(GTK_BOX(hbox), image, FALSE, FALSE, 5);
+        g_signal_connect(event_box, "button_press_event", G_CALLBACK(update_inform), (gpointer)frame);
+        sprintf(welcm_lebel, "欢迎您，\n%s", p->r_e->name);
+        label = gtk_label_new(welcm_lebel);
+        // g_signal_connect(G_OBJECT(label), "clicked", G_CALLBACK(update_inform), NULL);
+        gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 5);
+    }
+    else
+    {
+        image = gtk_image_new_from_file(admin_image);
+        gtk_box_pack_start(GTK_BOX(hbox), image, FALSE, FALSE, 5);
+        label = gtk_label_new("欢迎您，\n管理员");
+        gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 5);
+    }
+
     /*********************/
 
     /*function*/
@@ -173,8 +238,8 @@ void main_page(int user)
         frame = gtk_frame_new("温馨提示");
         gtk_box_pack_start(GTK_BOX(vbox), frame, FALSE, FALSE, 5);
         char tips[HUGE];
-        sprintf(employee.start_time, "%s", get_current_time());
-        snprintf(tips, HUGE, "现在时间是：%s，已录入考勤开始时间。\n结束时间将随您退出本程序计入程序后台，您可在系统内部自助查询。", employee.start_time);
+        sprintf(record.start_time, "%s", get_current_time());
+        snprintf(tips, HUGE, "现在时间是：%s，已录入考勤开始时间。\n结束时间将随您退出本程序计入程序后台，您可在系统内部自助查询。", record.start_time);
         label = gtk_label_new(tips);
         gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_LEFT);
         // gtk_label_set_line_wrap(GTK_LABEL(label), TRUE);
@@ -189,17 +254,20 @@ void main_page(int user)
         frame = gtk_frame_new("通知");
         // gtk_box_pack_start(GTK_BOX(hbox), frame, FALSE, FALSE, 5);
         gtk_table_attach_defaults(GTK_TABLE(table), frame, 2, 9, 9, 18);
-        char notice[HUGE] = {"1.weidalfjljfljd\n2.dajfkjdls"};
-        label = gtk_label_new(notice);
-        gtk_label_set_line_wrap(GTK_LABEL(label), TRUE);
-        gtk_container_add(GTK_CONTAINER(frame), label);
-
+        // const gchar *notice;
+        // notice = get_inform_form_mysql(mysql, "select * from notify", "");
+        // printf("%s",notice);
+        // label = gtk_label_new(get_inform_form_mysql(mysql, "select * from notify", NULL));
+        // gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_LEFT);
+        // gtk_label_set_line_wrap(GTK_LABEL(label), TRUE);
+        // gtk_container_add(GTK_CONTAINER(frame), label);
 
         ////function three////
         frame = gtk_frame_new("考勤信息查询");
         // gtk_box_pack_start(GTK_BOX(hbox), frame, FALSE, FALSE, 140);
         gtk_table_attach_defaults(GTK_TABLE(table), frame, 11, 21, 9, 18);
-
+        // vbox = admin_functionTwo(s_window);
+        gtk_container_add(GTK_CONTAINER(frame), vbox);
 
         /*********************/
     }
@@ -220,24 +288,33 @@ void main_page(int user)
         gtk_table_attach_defaults(GTK_TABLE(table), frame, 2, 11, 6, 8);
         vbox_f = gtk_vbox_new(FALSE, 0);
         gtk_container_add(GTK_CONTAINER(frame), vbox_f);
-        text_view = gtk_text_view_new();
+        text_view = gtk_text_view_new(); //创建文本框
         gtk_widget_set_size_request(text_view, 250, 100);
         gtk_box_pack_start(GTK_BOX(vbox_f), text_view, FALSE, FALSE, 5);
-        // g_signal_connect();
+        // GtkTextIter start,end;
+        const gchar *text = {"请在此输入您要发布的公告"};
+        gtk_text_buffer_set_text(GTK_TEXT_BUFFER(buffer), text, strlen(text));
+        buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(text_view));
+        // gtk_text_buffer_get_bounds(GTK_TEXT_BUFFER(buffer),&start,&end);
+        // gtk_text_buffer_insert(GTK_TEXT_BUFFER(buffer),&end,text,strlen(text));
         button = gtk_button_new_with_label("发布");
         gtk_box_pack_start(GTK_BOX(vbox_f), button, FALSE, FALSE, 10);
-        // g_signal_connect();
+        g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(send_notify), NULL);
 
         ////function two////
         frame = gtk_frame_new("员工信息查询");
         gtk_table_attach_defaults(GTK_TABLE(table), frame, 2, 11, 10, 18);
         // gtk_box_pack_start(GTK_BOX(vbox), frame, TRUE, TRUE, 40);
-        vbox = admin_functionTwo(s_window);
+        gchar *title_infom[5] = {"编号", "姓名", "性别", "年龄"};
+        vbox = admin_functionTwo(s_window, title_infom, 4, 460);
         gtk_container_add(GTK_CONTAINER(frame), vbox);
 
         ////function three///
         frame = gtk_frame_new("员工考勤信息");
         gtk_table_attach_defaults(GTK_TABLE(table), frame, 12, 25, 6, 18);
+        gchar *title_attendance[4] = {"编号", "姓名", "日期", "完成情况"};
+        vbox = admin_functionTwo(s_window, title_attendance, 4, 680);
+        gtk_container_add(GTK_CONTAINER(frame), vbox);
         // gtk_box_pack_start(GTK_BOX(hbox), frame, TRUE, TRUE, 300);
     }
 
@@ -245,7 +322,7 @@ void main_page(int user)
     /*********************/
     button = create_button(GTK_STOCK_HOME);
     // gtk_tooltips_set_tip(GTK_TOOLTIPS(button_tips), button, "退出回到首页", "首页");
-    g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(go_back_to_firstPage), s_window);
+    g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(go_back_to_firstPage), (gpointer)user);
     gtk_table_attach_defaults(GTK_TABLE(table), button, 26, 27, 16, 17);
 
     ////exit the system////
@@ -275,8 +352,8 @@ void main_page(int user)
 void callBack(GtkWidget *widget, GtkWidget *button)
 {
     GtkWidget *dialog;
-    gboolean choice;
-    char ch[2][6] = {"user", "admin"}; //0:user,1:admin
+    gboolean choice; //0:user,1:admin
+    char ch[2][6] = {"user", "admin"};
     /*get input id and passwd*/
     Input.id = gtk_entry_get_text(GTK_ENTRY(entryUser));
     printf("id is %s\n", Input.id);
@@ -312,7 +389,7 @@ void callBack(GtkWidget *widget, GtkWidget *button)
         {
             printf("%s %s successful logged in!\n", ch[choice], Input.id);
             gtk_widget_hide_all(main_window);
-            get_personal_inform(ch[choice]);
+            get_personal_inform(choice);
             main_page(choice);
         }
     }
@@ -443,9 +520,10 @@ int UI(char *name)
     sprintf(sys_name, "%s", name);
     gtk_init(NULL, NULL); //初始化
 
-    // first_page();
+    first_page();
     // main_page(1);
-    get_personal_inform("user");
+    // get_personal_inform("user");
+    // search_mysql(mysql,)
 
     gtk_main(); //gtk+2.0等待事件(如键盘事件或鼠标事件) 的发生
 }

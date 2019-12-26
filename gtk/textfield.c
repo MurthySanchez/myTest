@@ -33,6 +33,7 @@ void button_event(GtkWidget *widget,gpointer *data)
     gtk_box_pack_start(GTK_BOX(box),text_view,FALSE,FALSE,0); 
  
     buffer=gtk_text_view_get_buffer(GTK_TEXT_VIEW(text_view));
+    gtk_textview
  
     button=gtk_button_new_with_label("sure");
     gtk_box_pack_start(GTK_BOX(box),button,FALSE,FALSE,5);

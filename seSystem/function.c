@@ -135,7 +135,14 @@ void append_row(GtkWidget *button, GtkWidget *window)
     add_win = create_addwin(window);
 }
 
-GtkWidget *admin_functionTwo(GtkWidget *window)
+/**
+ * 生成输出表格
+ * @window:表格所在窗口
+ * @titiles:表头
+ * @field:列数
+ * @length:窗口大小
+ * */
+GtkWidget *admin_functionTwo(GtkWidget *window, gchar **titles, int field, int length)
 {
     GtkWidget *vbox;
     GtkWidget *bbox;
@@ -150,7 +157,12 @@ GtkWidget *admin_functionTwo(GtkWidget *window)
     // gtk_window_set_default_size(GTK_WINDOW(window), 200, 200);
     vbox = gtk_vbox_new(FALSE, 0);
     // gtk_container_add(GTK_CONTAINER(window), vbox);
-    clist = gtk_clist_new_with_titles(5, titles);
+    clist = gtk_clist_new_with_titles(field, titles);
+    for (int i = 0; i < field; i++)
+    {
+        gtk_clist_set_column_width(GTK_CLIST(clist), i, length/field);
+        gtk_clist_set_column_justification(GTK_CLIST(clist), field, GTK_JUSTIFY_FILL);
+    }
     gtk_box_pack_start(GTK_BOX(vbox), clist, TRUE, TRUE, 5);
 
     bbox = gtk_hbutton_box_new();
