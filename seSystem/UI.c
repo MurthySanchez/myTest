@@ -74,7 +74,7 @@ void new_dialog(GtkWidget *widget, GtkMessageType type, const gchar *msg)
     // return dialog;
 }
 
-void go_back_to_firstPage(GtkWidget *widget, gpointer data)
+void go_back_to_firstPage(GtkWidget *widget,gint data)
 {
     char message[MID];
     printf("user exit the system.\n");
@@ -100,44 +100,43 @@ void update_inform(GtkWidget *widget, gpointer data)
  * */
 void get_personal_inform(int choice)
 {
+    result_from_mysql *tmp;
     char sql[MID];
     if (choice == 0)
     {
         snprintf(sql, MID, "select * from employee where id='%s'", Input.id);
-        p = get_results_from_mysql(mysql, sql);
+        printf("getting p...\n");
+        p = get_results_from_mysql(mysql, sql, 0);
+        // head = p;
+        tmp = p;
         printf("get_personal_inform() as follow\n");
-        while (p->r_e->next != NULL)
+        while (tmp->r_e->next != NULL)
         {
-            p->r_e = p->r_e->next;
-            printf("%s\t%s\t%s\t%s\t%s\t", p->r_e->id,p->r_e->name,p->r_e->age,p->r_e->image);
+            tmp->r_e = tmp->r_e->next;
+            employee.name=tmp->r_e->name;
+            employee.sex=tmp->r_e->sex;
+            employee.age=tmp->r_e->age;
+            employee.image=tmp->r_e->image;
+            printf("%s\t%s\t%s\t%s\t%s\n", tmp->r_e->id, tmp->r_e->name, tmp->r_e->sex, tmp->r_e->age, tmp->r_e->image);
+            printf("%s\n",employee.name);
         }
         printf("\n");
-
-        // // snprintf(sql, MID, , Input.id);
-        // // search_mysql(mysql, sql);
-
-        // employee.name = get_inform_form_mysql(mysql, "select name from employee where id=", Input.id);
-        // // mysql_free_result(res);
-        // // printf("name %s\n", employee.name);
-
-        // // snprintf(sql, MID, "select sex from employee where id='%s'", Input.id);
-        // // search_mysql(mysql, sql);
-        // employee.sex = get_inform_form_mysql(mysql, "select sex from employee where id=", Input.id);
-        // // printf("sex %s\n", employee.sex);
-
-        // // snprintf(sql, MID, "select age from employee where id='%s'", Input.id);
-        // // search_mysql(mysql, sql);
-        // employee.age = get_inform_form_mysql(mysql, "select age from employee where id=", Input.id);
-        // // printf("age %s\n", employee.age);
-
-        // // snprintf(sql, MID, "select image from employee where id='%s'", Input.id);
-        // // search_mysql(mysql, sql);
-        // employee.image = get_inform_form_mysql(mysql, "select image from employee where id=", Input.id);
-        // printf("name %s,sex %s,age %s,image %s\n", employee.name, employee.sex, employee.age, employee.image);
+        printf("get_personal_inform():ok.\n");
     }
     else
     {
-        admin_image = "./image/person/robot.jpg";
+        snprintf(sql,MID,"select * from admin where id='%s'",Input.id);
+        p=get_results_from_mysql(mysql,sql,1);
+        // head = p;
+        tmp=p;
+        printf("admin name is as follow\n");
+        tmp->r_a=tmp->r_a->next;
+        printf("%s\n",tmp->r_a->account);
+        admin_name=tmp->r_a->account;
+
+        printf("%s\n",admin_name);
+        // printf("%s\n",tmp->r_a->account);
+        printf("get_personal_inform():ok.\n");
     }
 }
 
@@ -166,6 +165,8 @@ void main_page(int user)
     GtkWidget *image;
     GtkWidget *event_box;
     GtkWidget *text_view;
+
+    // p = head;
 
     // gchar **titles;
 
@@ -208,19 +209,21 @@ void main_page(int user)
     char welcm_lebel[SMALL];
     if (user == 0)
     {
-        image = gtk_image_new_from_file(p->r_e->image);
+        image = gtk_image_new_from_file(employee.image);
         gtk_box_pack_start(GTK_BOX(hbox), image, FALSE, FALSE, 5);
         g_signal_connect(event_box, "button_press_event", G_CALLBACK(update_inform), (gpointer)frame);
-        sprintf(welcm_lebel, "欢迎您，\n%s", p->r_e->name);
+        sprintf(welcm_lebel, "欢迎您，\n%s",employee.name);
         label = gtk_label_new(welcm_lebel);
         // g_signal_connect(G_OBJECT(label), "clicked", G_CALLBACK(update_inform), NULL);
         gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 5);
     }
     else
     {
-        image = gtk_image_new_from_file(admin_image);
+        image = gtk_image_new_from_file("./image/person/robot.jpg");
         gtk_box_pack_start(GTK_BOX(hbox), image, FALSE, FALSE, 5);
-        label = gtk_label_new("欢迎您，\n管理员");
+        printf("success open the image\n");
+        sprintf(welcm_lebel, "欢迎您，\n%s",admin_name);
+        label = gtk_label_new(welcm_lebel);
         gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 5);
     }
 
@@ -322,7 +325,7 @@ void main_page(int user)
     /*********************/
     button = create_button(GTK_STOCK_HOME);
     // gtk_tooltips_set_tip(GTK_TOOLTIPS(button_tips), button, "退出回到首页", "首页");
-    g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(go_back_to_firstPage), (gpointer)user);
+    g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(go_back_to_firstPage),(gpointer)user);
     gtk_table_attach_defaults(GTK_TABLE(table), button, 26, 27, 16, 17);
 
     ////exit the system////

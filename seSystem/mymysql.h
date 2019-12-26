@@ -11,7 +11,7 @@
 /*admin结果集*/
 typedef struct results_admin
 {
-    int *id;
+    char *id;
     char *account;
     char *passwd;
     char *state;
@@ -32,7 +32,7 @@ typedef struct results_employee
 /*user结果集*/
 typedef struct results_user
 {
-    int *id;
+    char *id;
     char *account;
     char *passwd;
     char *status;
@@ -42,7 +42,7 @@ typedef struct results_user
 /*record结果集*/
 typedef struct results_record
 {
-    int *id;
+    char *id;
     char *online_time;
     char *down_time;
     struct results_record *next;
@@ -51,7 +51,7 @@ typedef struct results_record
 /*notify结果集*/
 typedef struct results_notify
 {
-    int *id;
+    char *id;
     char *notify;
     struct results_notify *next;
 } link_results_notify;
@@ -63,10 +63,10 @@ typedef struct results
     link_results_user *r_u;
     link_results_record *r_r;
     link_results_notify *r_n;
-}result_from_mysql;
+} result_from_mysql;
 
-result_from_mysql *display_mysql(MYSQL_RES *res);
-result_from_mysql *get_results_from_mysql(MYSQL *mysql, const char *str);
+result_from_mysql *store_mysql(MYSQL_RES *res, int ch);
+result_from_mysql *get_results_from_mysql(MYSQL *mysql, const char *str, int ch);
 // const char *output_singal_mysql_result(MYSQL_RES *res);
 const char *get_inform_form_mysql(MYSQL *mysql, const char *sql, const char *data);
 int search_mysql(MYSQL *mysql, const char *str);

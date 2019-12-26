@@ -14,93 +14,191 @@ MYSQL_RES *res; //记录集
 result_from_mysql *p;
 
 /**
- * 保存数据库结果
- * input：MYSQL_RES res
+ * 将获取到的链表输出
+ * 输入数据：
+ * @mysql:数据库
+ * @str: 搜索内容
+ * @ch:不同选项代表结果输出不同类型结构体
+ * 0-4:
+ *          0:link_results_employee
+ *          1:link_results_admin
+ *          2:link_results_user
+ *          3:link_results_record
+ *          4:link_results_notify
+ * 返回数据：@p:result_from_mysql 返回大结构体
  * */
-result_from_mysql *display_mysql(MYSQL_RES *res)
-{
-    MYSQL_ROW row;
-    link_results_employee *head, *node, *tail;
-    int i;
-    result_from_mysql *p;
-    int iNum_rows = mysql_num_rows(res);     //GET ROWS
-    int iNum_fields = mysql_num_fields(res); //GET FIELDS
-
-    head = (link_results_employee *)malloc(sizeof(link_results_employee));
-    p->r_e = head;
-    tail = head; //tail->head
-
-    printf("display_mysql():共%d个记录\n", iNum_rows);
-
-    while ((row = mysql_fetch_row(res))) // 打印结果集
-    {
-        // for (i = 0; i < iNum_fields; i++)
-        // {
-        node = (link_results_employee *)malloc(sizeof(link_results_employee));
-        //     node->result = row[i];
-        //     printf("%s\t", row[i]); //输出
-        //     // printf("2.%s\t", node->result);
-        //     tail->next = node;
-        //     tail = node;
-        // }
-        printf("kk\n");
-        node->id = row[0];
-        node->name = row[1];
-        node->sex = row[2];
-        node->age = row[3];
-        node->image = row[4];
-        tail->next = node;
-        tail = node;
-    }
-    tail->next = NULL;
-    printf("\n");
-    // while (head->next != NULL)
-    // {
-    //     head = head->next;
-    //     printf("%s\t", head->result);
-    // }
-    printf("\n");
-    mysql_free_result(res); // 释放结果集
-    return p;
-}
-
-result_from_mysql *get_results_from_mysql(MYSQL *mysql, const char *str)
+result_from_mysql *get_results_from_mysql(MYSQL *mysql, const char *str, int ch)
 {
     result_from_mysql *p;
     search_mysql(mysql, str);
-    p = display_mysql(res);
-    printf("get_results_from_mysql() as follow.\n");
-
+    printf("storing p...\n");
+    p = store_mysql(res, ch);
+    printf("get_results_from_mysql():ok.\n");
     return p;
 }
 
-// /**
-//  * 获取数据库结果
-//  * input：MYSQL_RES res
-//  * */
-// const char *output_singal_mysql_result(MYSQL_RES *res)
-// {
-//     // MYSQL_RES *res; //记录集
-//     // const char *result;
-//     MYSQL_ROW row;
-//     int i;
-//     int iNum_rows = mysql_num_rows(res);     //GET ROWS
-//     int iNum_fields = mysql_num_fields(res); //GET FIELDS
+/**
+ * 保存数据库结果
+ * 输入数据：
+ * @res:
+ * @ch:0-4:
+ *          0:link_results_employee
+ *          1:link_results_admin
+ *          2:link_results_user
+ *          3:link_results_record
+ *          4:link_results_notify
+ * 输出数据：
+ * @p:result_from_mysql类型
+ * */
+result_from_mysql *store_mysql(MYSQL_RES *res, int ch)
+{
+    MYSQL_ROW row;
+    result_from_mysql *p;
+    switch (ch)
+    {
+    case 0:
+    {
+        int i;
+        link_results_employee *head_e, *node_e, *tail_e;
+        int iNum_rows = mysql_num_rows(res); //GET ROWS
 
-//     printf("共%d个记录\n", iNum_rows);
+        head_e = (link_results_employee *)malloc(sizeof(link_results_employee));
+        p->r_e = head_e;
+        tail_e = head_e; //tail_e->head_e
 
-//     while ((row = mysql_fetch_row(res))) // 打印结果集
-//     {
-//         for (i = 0; i < iNum_fields; i++)
-//         {
-//             result = row[i];
-//         }
-//         printf("\n");
-//     }
-//     printf("\n");
-//     mysql_free_result(res); // 释放结果集
-//     return result;
-// }
+        printf("display_mysql():共%d个记录\n", iNum_rows);
+
+        while ((row = mysql_fetch_row(res))) // 打印结果集
+        {
+            node_e = (link_results_employee *)malloc(sizeof(link_results_employee));
+            printf("ee\n");
+            node_e->id = row[0];
+            node_e->name = row[1];
+            node_e->sex = row[2];
+            node_e->age = row[3];
+            node_e->image = row[4];
+            tail_e->next = node_e;
+            tail_e = node_e;
+        }
+        tail_e->next = NULL;
+        printf("\n");
+        mysql_free_result(res); // 释放结果集
+        return p;
+    }
+    case 1: //admin
+    {
+        link_results_admin *head_a, *node_a, *tail_a;
+        int i;
+        int iNum_rows = mysql_num_rows(res); //GET ROWS
+
+        head_a = (link_results_admin *)malloc(sizeof(link_results_admin));
+        p->r_a = head_a;
+        tail_a = head_a; //tail_a->head_a
+
+        printf("display_mysql():共%d个记录\n", iNum_rows);
+
+        while ((row = mysql_fetch_row(res))) // 打印结果集
+        {
+            node_a = (link_results_admin *)malloc(sizeof(link_results_admin));
+            printf("aa\n");
+            node_a->id = row[0];
+            node_a->account = row[1];
+            node_a->passwd = row[2];
+            node_a->state = row[3];
+            tail_a->next = node_a;
+            tail_a = node_a;
+        }
+        tail_a->next = NULL;
+        printf("\n");
+        mysql_free_result(res); // 释放结果集
+        return p;
+    }
+    case 2: //user
+    {
+        link_results_user *head_u, *node_u, *tail_u;
+        int i;
+        int iNum_rows = mysql_num_rows(res); //GET ROWS
+
+        head_u = (link_results_user *)malloc(sizeof(link_results_user));
+        p->r_u = head_u;
+        tail_u = head_u; //tail_u->head_u
+
+        printf("display_mysql():共%d个记录\n", iNum_rows);
+
+        while ((row = mysql_fetch_row(res))) // 打印结果集
+        {
+            node_u = (link_results_user *)malloc(sizeof(link_results_user));
+            printf("uu\n");
+            node_u->id = row[0];
+            node_u->account = row[1];
+            node_u->passwd = row[2];
+            node_u->status = row[3];
+            tail_u->next = node_u;
+            tail_u = node_u;
+        }
+        tail_u->next = NULL;
+        printf("\n");
+        mysql_free_result(res); // 释放结果集
+        return p;
+    }
+    case 3: //record
+    {
+        link_results_record *head_r, *node_r, *tail_r;
+        int i;
+        int iNum_rows = mysql_num_rows(res); //GET ROWS
+
+        head_r = (link_results_record *)malloc(sizeof(link_results_record));
+        p->r_r = head_r;
+        tail_r = head_r; //tail_r->head_r
+
+        printf("display_mysql():共%d个记录\n", iNum_rows);
+
+        while ((row = mysql_fetch_row(res))) // 打印结果集
+        {
+            node_r = (link_results_record *)malloc(sizeof(link_results_record));
+            printf("rr\n");
+            node_r->id = row[0];
+            node_r->online_time = row[1];
+            node_r->down_time = row[2];
+            tail_r->next = node_r;
+            tail_r = node_r;
+        }
+        tail_r->next = NULL;
+        printf("\n");
+        mysql_free_result(res); // 释放结果集
+        return p;
+    }
+    case 4: //notify
+    {
+        link_results_notify *head_n, *node_n, *tail_n;
+        int i;
+        int iNum_rows = mysql_num_rows(res); //GET ROWS
+
+        head_n = (link_results_notify *)malloc(sizeof(link_results_notify));
+        p->r_n = head_n;
+        tail_n = head_n; //tail_n->head_n
+
+        printf("display_mysql():共%d个记录\n", iNum_rows);
+
+        while ((row = mysql_fetch_row(res))) // 打印结果集
+        {
+            node_n = (link_results_notify *)malloc(sizeof(link_results_notify));
+            printf("nn\n");
+            node_n->id = row[0];
+            node_n->notify = row[1];
+            tail_n->next = node_n;
+            tail_n = node_n;
+        }
+        tail_n->next = NULL;
+        printf("\n");
+        mysql_free_result(res); // 释放结果集
+        return p;
+    }
+    default:
+        printf("something wrong in store_mysql() ");
+        break;
+    }
+}
 
 /**
  * 获取数据库结果
@@ -116,8 +214,7 @@ const char *get_inform_form_mysql(MYSQL *mysql, const char *pre_sql, const char 
     char *sql;
     MYSQL_ROW row;
     int i;
-    int iNum_rows = mysql_num_rows(res);     //GET ROWS
-    int iNum_fields = mysql_num_fields(res); //GET FIELDS
+    int iNum_rows = mysql_num_rows(res); //GET ROW
     printf("pre_sql:%s,data:%s\n", pre_sql, data);
     if (data != NULL)
     {
@@ -125,7 +222,7 @@ const char *get_inform_form_mysql(MYSQL *mysql, const char *pre_sql, const char 
     }
     else
     {
-        sprintf(sql, pre_sql);
+        sprintf(sql, "%s", pre_sql);
     }
     printf("%s", sql);
     mysql_query(mysql, sql);
