@@ -5,7 +5,7 @@ gint current_row = 0;
 gint row_count = 0;
 
 /**/
-void on_ok_clicked(GtkWidget *button, gpointer data)
+void on_ok_clicked(GtkWidget *button, GtkWidget *window)
 {
     new_row[0] = gtk_entry_get_text(GTK_ENTRY(entry_id));
     new_row[1] = gtk_entry_get_text(GTK_ENTRY(entry_name));
@@ -19,13 +19,18 @@ void on_ok_clicked(GtkWidget *button, gpointer data)
     }
     row_count++;
     gtk_clist_append(GTK_CLIST(clist), (gchar **)(new_row));
-    gtk_widget_destroy(add_win);
+    gtk_widget_destroy(window);
+}
+
+void goto_search(GtkWidget *button, gpointer data)
+{
+
 }
 
 /*点击取消，关闭子窗口*/
-void on_cancel_clicked(GtkWidget *button, gpointer data)
+void on_cancel_clicked(GtkWidget *button, GtkWidget *window)
 {
-    gtk_widget_destroy(add_win);
+    gtk_widget_destroy(window);
 }
 
 /*添加信息窗口*/
@@ -75,10 +80,10 @@ GtkWidget *create_addwin(GtkWidget *window)
 
     gtk_button_box_set_layout(GTK_BUTTON_BOX(bbox), GTK_BUTTONBOX_END);
     button = gtk_button_new_from_stock(GTK_STOCK_OK);
-    g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(on_ok_clicked), NULL);
+    g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(on_ok_clicked), win);
     gtk_box_pack_start(GTK_BOX(bbox), button, FALSE, FALSE, 5);
     button = gtk_button_new_from_stock(GTK_STOCK_CANCEL);
-    g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(on_cancel_clicked), NULL);
+    g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(on_cancel_clicked), win);
     gtk_box_pack_start(GTK_BOX(bbox), button, FALSE, FALSE, 5);
 
     gtk_widget_show_all(win);
@@ -175,6 +180,7 @@ GtkWidget *admin_functionTwo(GtkWidget *window, gchar **titles, int field, int l
     // gtk_box_pack_start(GTK_BOX(bbox), entry_search, FALSE, FALSE, 5);
     button = create_button(GTK_STOCK_FIND);
     gtk_tooltips_set_tip(GTK_TOOLTIPS(button_tips), button, "查询", "查询");
+    g_signal_connect(G_OBJECT(button),"clicked",G_CALLBACK(goto_search),NULL);
     gtk_box_pack_start(GTK_BOX(bbox), button, FALSE, FALSE, 2);
     button = create_button(GTK_STOCK_GOTO_FIRST);
     gtk_tooltips_set_tip(GTK_TOOLTIPS(button_tips), button, "转到首行", "首行");

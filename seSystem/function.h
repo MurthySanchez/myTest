@@ -18,17 +18,16 @@ static GtkWidget *entry_search;
 //     struct titles *next;
 // }titles;
 
-
 // static GtkWidget *window;
 
-void on_ok_clicked(GtkWidget *button, gpointer data);
-void on_cancel_clicked(GtkWidget *button, gpointer data);
+void on_ok_clicked(GtkWidget *button, GtkWidget *window);
+void on_cancel_clicked(GtkWidget *button, GtkWidget *window);
 GtkWidget *create_button(gchar *stockid);
 void goto_first(GtkWidget *button, gpointer data);
 void goto_last(GtkWidget *button, gpointer data);
 void goto_back(GtkWidget *button, gpointer data);
 void goto_forward(GtkWidget *button, gpointer data);
 GtkWidget *create_addwin(GtkWidget *window);
-GtkWidget *admin_functionTwo(GtkWidget *window,gchar **titles,int field, int length);
+GtkWidget *admin_functionTwo(GtkWidget *window, gchar **titles, int field, int length);
 
 #endif

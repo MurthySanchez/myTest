@@ -38,6 +38,30 @@ result_from_mysql *get_results_from_mysql(MYSQL *mysql, const char *str, int ch)
 }
 
 /**
+ * 写入数据库
+ * 输入参数：
+ * @mysql:mysql
+ * @sql: sql语句
+ * */
+int set_value_to_mysql(MYSQL *t_mysql, const char *sql)
+{
+    MYSQL_RES *t_res; //记录集
+    printf("%s\n", sql);
+    if (mysql_real_query(t_mysql, sql, strlen(sql)))
+    {
+        printf("mysql_real_query():%s\n", mysql_error(t_mysql));
+        return -1;
+    }
+    else
+    {
+        t_res = mysql_store_result(t_mysql);
+    }
+    // printf("display insert:\n");
+    // display_mysql(t_res);
+    return 0;
+}
+
+/**
  * 保存数据库结果
  * 输入数据：
  * @res:
