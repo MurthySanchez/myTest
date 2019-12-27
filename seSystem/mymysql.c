@@ -45,19 +45,13 @@ result_from_mysql *get_results_from_mysql(MYSQL *mysql, const char *str, int ch)
  * */
 int set_value_to_mysql(MYSQL *t_mysql, const char *sql)
 {
-    MYSQL_RES *t_res; //记录集
+    // MYSQL_RES *t_res; //记录集
     printf("%s\n", sql);
     if (mysql_real_query(t_mysql, sql, strlen(sql)))
     {
         printf("mysql_real_query():%s\n", mysql_error(t_mysql));
         return -1;
     }
-    else
-    {
-        t_res = mysql_store_result(t_mysql);
-    }
-    // printf("display insert:\n");
-    // display_mysql(t_res);
     return 0;
 }
 
@@ -258,7 +252,7 @@ const char *get_inform_form_mysql(MYSQL *mysql, const char *pre_sql, const char 
     else
     {
         res = mysql_store_result(mysql);
-        if (!(row = mysql_num_rows(res)))
+        if (!(i = mysql_num_rows(res)))
         { //无搜索结果
             printf("cannot find any answer!\n");
             return "-1";

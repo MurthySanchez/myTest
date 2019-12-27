@@ -5,6 +5,7 @@
 #include "stdio.h"
 #include "string.h"
 #include "time.h"
+#include <unistd.h>
 
 //外部变量
 extern MYSQL *mysql;
@@ -145,14 +146,16 @@ void get_personal_inform(int choice)
     {
         snprintf(sql, MID, "select * from admin where id='%s'", Input.id);
         p = get_results_from_mysql(mysql, sql, 1);
+        // sleep(5);
         // head = p;
         tmp = p;
+        // sleep(5);
         printf("admin name is as follow\n");
         tmp->r_a = tmp->r_a->next;
-        printf("%s\n", tmp->r_a->account);
+        printf("tmp->r_a->account:%s\n", tmp->r_a->account);
         admin_name = tmp->r_a->account;
 
-        printf("%s\n", admin_name);
+        printf("admin_name:%s\n", admin_name);
         // printf("%s\n",tmp->r_a->account);
         printf("get_personal_inform():ok.\n");
     }
@@ -160,21 +163,72 @@ void get_personal_inform(int choice)
 
 void send_notify(GtkWidget *widget, GtkTextBuffer *buffer)
 {
-    const gchar *text;
-    char *sql;
+    const gchar *text = {"null"};
+    char sql[MID];
     GtkTextIter start, end;
     gtk_text_buffer_get_bounds(GTK_TEXT_BUFFER(buffer), &start, &end);
-    if ((gtk_text_buffer_get_selection_bounds(GTK_TEXT_BUFFER(buffer), &start, &end)))
+    const GtkTextIter s = start, e = end;
+    text = gtk_text_buffer_get_text(GTK_TEXT_BUFFER(buffer), &s, &e, TRUE);
+    printf("text_view:%s\n",text);
+    if (!g_str_equal(text,""))
     {
-        const GtkTextIter s = start, e = end;
-        text = gtk_text_buffer_get_text(GTK_TEXT_BUFFER(buffer), &s, &e, TRUE);
+
         g_print("send_notify():text_view:%s\n", text);
-        snprintf(sql, MID, "insert into notify(notify) values ('%s')", text);
-        if (!set_value_to_mysql(mysql, sql))
+        sprintf(sql,"insert into notify(notify) values ('%s')", text);
+        printf("sql ready!sql :%s\n",sql);
+        if (0!=set_value_to_mysql(mysql, sql))
         {
-            printf("successful write into the db");
+            printf("error to write into the db\n");
         }
         new_dialog(s_window, GTK_MESSAGE_INFO, "发布成功");
+    }
+}
+/**
+ * 登陆按钮事件
+ * */
+void callBack(GtkWidget *widget, GtkWidget *button)
+{
+    GtkWidget *dialog;
+    gboolean choice; //0:user,1:admin
+    char ch[2][6] = {"user", "admin"};
+    /*get input id and passwd*/
+    Input.id = gtk_entry_get_text(GTK_ENTRY(entryUser));
+    printf("id is %s\n", Input.id);
+    Input.passwd = gtk_entry_get_text(GTK_ENTRY(entryPW));
+    printf("passwd is %s\n", Input.passwd);
+
+    if ((choice = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button))))
+        sprintf(Output.searchId, "SELECT * FROM admin WHERE id='%s'", Input.id); //admin table search
+    // printf("yes\n");
+    else
+    {
+        sprintf(Output.searchId, "SELECT * FROM user WHERE id='%s'", Input.id); //user table search
+        // printf("no!\n");
+    }
+
+    sprintf(Output.searchPasswd, "%s and passwd='%s'", Output.searchId, Input.passwd);
+    /*search db*/
+    /*********************/
+    if (search_mysql(mysql, Output.searchId))
+    {
+        new_dialog(NULL, GTK_MESSAGE_ERROR, "不存在该用户！");
+        printf("cannot find the people\n");
+    }
+    else
+    {
+        printf("%s trying online.\n", Input.id);
+        if (search_mysql(mysql, Output.searchPasswd))
+        {
+            new_dialog(NULL, GTK_MESSAGE_ERROR, "密码错误！");
+            printf("wrong passwd!\n");
+        }
+        else
+        {
+            printf("%s %s successful logged in!\n", ch[choice], Input.id);
+            gtk_widget_hide_all(main_window);
+            get_personal_inform(choice);
+            main_page(choice);
+        }
     }
 }
 
@@ -250,6 +304,7 @@ void main_page(int user)
         image = gtk_image_new_from_file("./image/person/robot.jpg");
         gtk_box_pack_start(GTK_BOX(hbox), image, FALSE, FALSE, 5);
         printf("success open the image\n");
+        // sleep(5);
         printf("admin_name :%s\n", admin_name);
         sprintf(welcm_lebel, "欢迎您，\n%s", admin_name);
         label = gtk_label_new(welcm_lebel);
@@ -350,7 +405,7 @@ void main_page(int user)
     /*********************/
     button = create_button(GTK_STOCK_HOME);
     // gtk_tooltips_set_tip(GTK_TOOLTIPS(button_tips), button, "退出回到首页", "首页");
-    g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(go_back_to_firstPage), (gpointer)user);
+    g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(go_back_to_firstPage), (gint)user);
     gtk_table_attach_defaults(GTK_TABLE(table), button, 26, 27, 16, 17);
 
     ////exit the system////
@@ -373,56 +428,6 @@ void main_page(int user)
 
     gtk_widget_show_all(s_window);
 }
-
-/**
- * 登陆按钮事件
- * */
-void callBack(GtkWidget *widget, GtkWidget *button)
-{
-    GtkWidget *dialog;
-    gboolean choice; //0:user,1:admin
-    char ch[2][6] = {"user", "admin"};
-    /*get input id and passwd*/
-    Input.id = gtk_entry_get_text(GTK_ENTRY(entryUser));
-    printf("id is %s\n", Input.id);
-    Input.passwd = gtk_entry_get_text(GTK_ENTRY(entryPW));
-    printf("passwd is %s\n", Input.passwd);
-
-    if ((choice = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button))))
-        sprintf(Output.searchId, "SELECT * FROM admin WHERE id='%s'", Input.id); //admin table search
-    // printf("yes\n");
-    else
-    {
-        sprintf(Output.searchId, "SELECT * FROM user WHERE id='%s'", Input.id); //user table search
-        // printf("no!\n");
-    }
-
-    sprintf(Output.searchPasswd, "%s and passwd='%s'", Output.searchId, Input.passwd);
-    /*search db*/
-    /*********************/
-    if (search_mysql(mysql, Output.searchId))
-    {
-        new_dialog(NULL, GTK_MESSAGE_ERROR, "不存在该用户！");
-        printf("cannot find the people\n");
-    }
-    else
-    {
-        printf("%s trying online.\n", Input.id);
-        if (search_mysql(mysql, Output.searchPasswd))
-        {
-            new_dialog(NULL, GTK_MESSAGE_ERROR, "密码错误！");
-            printf("wrong passwd!\n");
-        }
-        else
-        {
-            printf("%s %s successful logged in!\n", ch[choice], Input.id);
-            gtk_widget_hide_all(main_window);
-            get_personal_inform(choice);
-            main_page(choice);
-        }
-    }
-}
-/*********************/
 
 void first_page()
 {
@@ -548,8 +553,8 @@ int UI(char *name)
     sprintf(sys_name, "%s", name);
     gtk_init(NULL, NULL); //初始化
 
-    first_page();
-    // main_page(1);
+    // first_page();
+    main_page(1);
     // get_personal_inform("user");
     // search_mysql(mysql,"select * from admin");
     // if (set_value_to_mysql(mysql, "insert into notify(notify) values ('insert into')"))
