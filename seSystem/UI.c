@@ -87,7 +87,7 @@ void new_dialog(GtkWidget *widget, GtkMessageType type, const gchar *msg)
                                     GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
                                     type,
                                     GTK_BUTTONS_OK,
-                                    msg,NULL);
+                                    msg, NULL);
     gtk_dialog_run(GTK_DIALOG(dialog));
     gtk_widget_destroy(dialog);
     // return dialog;
@@ -110,7 +110,7 @@ void go_back_to_firstPage(GtkWidget *widget, gint data)
 void update_inform(GtkWidget *widget, gpointer data)
 {
     GtkWidget *window;
-    window = create_addwin(s_window,3);
+    window = create_addwin(s_window, 3);
 }
 
 /**
@@ -169,14 +169,14 @@ void send_notify(GtkWidget *widget, GtkTextBuffer *buffer)
     gtk_text_buffer_get_bounds(GTK_TEXT_BUFFER(buffer), &start, &end);
     const GtkTextIter s = start, e = end;
     text = gtk_text_buffer_get_text(GTK_TEXT_BUFFER(buffer), &s, &e, TRUE);
-    printf("text_view:%s\n",text);
-    if (!g_str_equal(text,""))
+    printf("text_view:%s\n", text);
+    if (!g_str_equal(text, ""))
     {
 
         g_print("send_notify():text_view:%s\n", text);
-        sprintf(sql,"insert into notify(notify) values ('%s')", text);
-        printf("sql ready!sql :%s\n",sql);
-        if (0!=set_value_to_mysql(mysql, sql))
+        sprintf(sql, "insert into notify(notify) values ('%s')", text);
+        printf("sql ready!sql :%s\n", sql);
+        if (0 != set_value_to_mysql(mysql, sql))
         {
             printf("error to write into the db\n");
         }
@@ -248,6 +248,7 @@ void main_page(int user)
     GtkWidget *event_box;
     GtkWidget *text_view;
 
+    char **init_data;
     // p = head;
 
     // gchar **titles;
@@ -353,7 +354,7 @@ void main_page(int user)
         frame = gtk_frame_new("考勤信息查询");
         // gtk_box_pack_start(GTK_BOX(hbox), frame, FALSE, FALSE, 140);
         gtk_table_attach_defaults(GTK_TABLE(table), frame, 11, 21, 9, 18);
-        // vbox = admin_functionTwo(s_window);
+        // vbox = function(s_window);
         gtk_container_add(GTK_CONTAINER(frame), vbox);
 
         /*********************/
@@ -389,14 +390,16 @@ void main_page(int user)
         gtk_table_attach_defaults(GTK_TABLE(table), frame, 2, 11, 10, 18);
         // gtk_box_pack_start(GTK_BOX(vbox), frame, TRUE, TRUE, 40);
         gchar *title_infom[5] = {"编号", "姓名", "性别", "年龄"};
-        vbox = admin_functionTwo(s_window, title_infom, 4, 460,0);
+        init_data = get_rows_from_mysql(mysql, "SELECT id,name,sex,age FROM employee");
+        vbox = function(s_window, title_infom, 4, 460, 0, init_data);
         gtk_container_add(GTK_CONTAINER(frame), vbox);
 
         ////function three///
         frame = gtk_frame_new("员工考勤信息");
         gtk_table_attach_defaults(GTK_TABLE(table), frame, 12, 25, 6, 18);
         gchar *title_attendance[4] = {"编号", "姓名", "日期", "考勤情况"};
-        vbox = admin_functionTwo(s_window, title_attendance, 4, 680,1);
+        **init_data = get_rows_from_mysql(mysql, "SELECT id,name,sex,age FROM employee");
+        vbox = function(s_window, title_attendance, 4, 680, 1);
         gtk_container_add(GTK_CONTAINER(frame), vbox);
         // gtk_box_pack_start(GTK_BOX(hbox), frame, TRUE, TRUE, 300);
     }

@@ -1,5 +1,6 @@
 #include <gtk/gtk.h>
 #include "function.h"
+#include "mymysql.h"
 
 const gchar *new_row[5];
 static GtkWidget *clist0, *clist1, *clist2;
@@ -374,8 +375,9 @@ void append_row(GtkWidget *button, gint data)
  * 0: admin添加员工信息
  * 1：admin员工考勤信息
  * 2：员工查看自身考勤信息
+ * @inits:表格初始显示值
  * */
-GtkWidget *admin_functionTwo(GtkWidget *window, gchar **titles, int field, int length, gint id)
+GtkWidget *function(GtkWidget *window, gchar **titles, int field, int length, gint id,char **inits)
 {
     GtkWidget *vbox;
     GtkWidget *bbox;
@@ -395,6 +397,8 @@ GtkWidget *admin_functionTwo(GtkWidget *window, gchar **titles, int field, int l
             gtk_clist_set_column_width(GTK_CLIST(clist0), i, length / field);
             gtk_clist_set_column_justification(GTK_CLIST(clist0), field, GTK_JUSTIFY_FILL);
         }
+        
+        gtk_clist_append(GTK_CLIST(clist0),inits);
         gtk_box_pack_start(GTK_BOX(vbox), clist0, TRUE, TRUE, 5);
 
         bbox = gtk_hbutton_box_new();

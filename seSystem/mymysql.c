@@ -14,6 +14,19 @@ MYSQL_RES *res; //记录集
 result_from_mysql *p;
 
 /**
+ * 获取结果集
+ * */
+char **get_rows_from_mysql(MYSQL *mysql, const char *str)
+{
+    MYSQL_ROW row;
+    search_mysql(mysql, str);
+    printf("storing ...\n");
+    row = mysql_fetch_row(res);
+    printf("get_rows_from_mysql():ok.\n");
+    return row;
+}
+
+/**
  * 将获取到的链表输出
  * 输入数据：
  * @mysql:数据库

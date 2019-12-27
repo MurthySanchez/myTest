@@ -65,6 +65,7 @@ typedef struct results
     link_results_notify *r_n;
 } result_from_mysql;
 
+char **get_rows_from_mysql(MYSQL *mysql, const char *str);
 void display_mysql(MYSQL_RES *t_res);
 result_from_mysql *store_mysql(MYSQL_RES *res, int ch);
 result_from_mysql *get_results_from_mysql(MYSQL *mysql, const char *str, int ch);
