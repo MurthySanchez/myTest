@@ -87,7 +87,7 @@ void new_dialog(GtkWidget *widget, GtkMessageType type, const gchar *msg)
                                     GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
                                     type,
                                     GTK_BUTTONS_OK,
-                                    msg);
+                                    msg,NULL);
     gtk_dialog_run(GTK_DIALOG(dialog));
     gtk_widget_destroy(dialog);
     // return dialog;
@@ -95,7 +95,7 @@ void new_dialog(GtkWidget *widget, GtkMessageType type, const gchar *msg)
 
 void go_back_to_firstPage(GtkWidget *widget, gint data)
 {
-    char message[MID];
+    char message[HUGE];
     printf("user exit the system.\n");
     gtk_widget_hide_all(s_window);
     if (data == 0)
@@ -110,7 +110,7 @@ void go_back_to_firstPage(GtkWidget *widget, gint data)
 void update_inform(GtkWidget *widget, gpointer data)
 {
     GtkWidget *window;
-    window = create_addwin(s_window);
+    window = create_addwin(s_window,3);
 }
 
 /**
@@ -389,14 +389,14 @@ void main_page(int user)
         gtk_table_attach_defaults(GTK_TABLE(table), frame, 2, 11, 10, 18);
         // gtk_box_pack_start(GTK_BOX(vbox), frame, TRUE, TRUE, 40);
         gchar *title_infom[5] = {"编号", "姓名", "性别", "年龄"};
-        vbox = admin_functionTwo(s_window, title_infom, 4, 460);
+        vbox = admin_functionTwo(s_window, title_infom, 4, 460,0);
         gtk_container_add(GTK_CONTAINER(frame), vbox);
 
         ////function three///
         frame = gtk_frame_new("员工考勤信息");
         gtk_table_attach_defaults(GTK_TABLE(table), frame, 12, 25, 6, 18);
-        gchar *title_attendance[4] = {"编号", "姓名", "日期", "完成情况"};
-        vbox = admin_functionTwo(s_window, title_attendance, 4, 680);
+        gchar *title_attendance[4] = {"编号", "姓名", "日期", "考勤情况"};
+        vbox = admin_functionTwo(s_window, title_attendance, 4, 680,1);
         gtk_container_add(GTK_CONTAINER(frame), vbox);
         // gtk_box_pack_start(GTK_BOX(hbox), frame, TRUE, TRUE, 300);
     }
@@ -405,7 +405,7 @@ void main_page(int user)
     /*********************/
     button = create_button(GTK_STOCK_HOME);
     // gtk_tooltips_set_tip(GTK_TOOLTIPS(button_tips), button, "退出回到首页", "首页");
-    g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(go_back_to_firstPage), (gint)user);
+    g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(go_back_to_firstPage), (gpointer)user);
     gtk_table_attach_defaults(GTK_TABLE(table), button, 26, 27, 16, 17);
 
     ////exit the system////
@@ -553,8 +553,8 @@ int UI(char *name)
     sprintf(sys_name, "%s", name);
     gtk_init(NULL, NULL); //初始化
 
-    // first_page();
-    main_page(1);
+    first_page();
+    // main_page(1);
     // get_personal_inform("user");
     // search_mysql(mysql,"select * from admin");
     // if (set_value_to_mysql(mysql, "insert into notify(notify) values ('insert into')"))

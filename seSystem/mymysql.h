@@ -63,7 +63,6 @@ typedef struct results
     link_results_user *r_u;
     link_results_record *r_r;
     link_results_notify *r_n;
-    struct results *next;
 } result_from_mysql;
 
 void display_mysql(MYSQL_RES *t_res);
