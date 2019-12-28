@@ -16,27 +16,27 @@ result_from_mysql *p;
 /**
  * 获取结果集
  * */
-char **get_rows_from_mysql(MYSQL *mysql, const char *str)
+MYSQL_RES *get_res_from_mysql(MYSQL *mysql, const char *str)
 {
-    MYSQL_ROW row;
+    MYSQL_RES *t_res;
     search_mysql(mysql, str);
     printf("storing ...\n");
-    row = mysql_fetch_row(res);
+    t_res = res;
     printf("get_rows_from_mysql():ok.\n");
-    return row;
+    return t_res;
 }
 
 /**
  * 获取行数
  * */
-int get_rownumber_from_mysql(MYSQL *mysql, const char *str)
+int get_row_number_from_mysql(MYSQL *mysql, const char *str)
 {
     int numberofRow;
-    printf("get_rownumber_from_mysql():start ...\n");
+    printf("get_row_number_from_mysql():start ...\n");
     search_mysql(mysql, str);
     // row = mysql_fetch_row(res);
     numberofRow=mysql_num_rows(res);
-    printf("get_rownumber_from_mysql():finish.\n");
+    printf("get_row_number_from_mysql():finish.\n");
     return numberofRow;
 }
 
