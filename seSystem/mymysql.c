@@ -27,6 +27,20 @@ char **get_rows_from_mysql(MYSQL *mysql, const char *str)
 }
 
 /**
+ * 获取行数
+ * */
+int get_rownumber_from_mysql(MYSQL *mysql, const char *str)
+{
+    int numberofRow;
+    printf("get_rownumber_from_mysql():start ...\n");
+    search_mysql(mysql, str);
+    // row = mysql_fetch_row(res);
+    numberofRow=mysql_num_rows(res);
+    printf("get_rownumber_from_mysql():finish.\n");
+    return numberofRow;
+}
+
+/**
  * 将获取到的链表输出
  * 输入数据：
  * @mysql:数据库
@@ -247,6 +261,7 @@ void display_mysql(MYSQL_RES *t_res)
         }
         printf("\n");
     }
+    mysql_free_result(t_res);
 
 }
 
@@ -328,7 +343,8 @@ int search_mysql(MYSQL *mysql, const char *str)
             return -1;
         }
     }
-    display_mysql(res); //correct
+    //注意：在此输出会释放掉res资源
+    // display_mysql(res); //correct
     // display_mysql(mysql_store_result(mysql));    //段错误 (核心已转储)
 
     return 0;

@@ -132,7 +132,9 @@ void main_page(int user)
     GtkWidget *event_box;
     GtkWidget *text_view;
 
-    char **init_employee_data, **init_attendance_data;
+    char **init_employee_data;
+    char **init_attendance_data;
+    int row;
     // p = head;
     printf("start mainpage.\n");
 
@@ -234,16 +236,21 @@ void main_page(int user)
         // const gchar *notice;
         result_from_mysql *tmp;
         tmp = get_results_from_mysql(mysql, "select * from notify", 4);
-        // p = tmp;
+        vbox = gtk_vbox_new(FALSE, 0);
+        gtk_container_add(GTK_CONTAINER(frame), vbox);
         while (tmp->r_n->next != NULL)
         {
             tmp->r_n = tmp->r_n->next;
-            printf("tmp->r_n:%s", tmp->r_n->notify);
+            printf("tmp->r_n:%s\n", tmp->r_n->notify);
+            printf("tmp->r_n:%s\n", tmp->r_n->id);
             label = gtk_label_new(tmp->r_n->notify);
-            gtk_container_add(GTK_CONTAINER(frame), label);
+            // gtk_container_add(GTK_CONTAINER(frame), label);
+            printf("...........\n");
+            // gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_LEFT);
             gtk_label_set_line_wrap(GTK_LABEL(label), TRUE);
-            gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_LEFT);
+            gtk_box_pack_start(GTK_BOX(vbox), label, FALSE, TRUE, 5);
         }
+        printf("ppppp\n");
         gtk_table_attach_defaults(GTK_TABLE(table), frame, 2, 9, 9, 18);
 
         ////function three////
@@ -286,24 +293,19 @@ void main_page(int user)
         gtk_table_attach_defaults(GTK_TABLE(table), frame, 2, 11, 10, 18);
         // gtk_box_pack_start(GTK_BOX(vbox), frame, TRUE, TRUE, 40);
         gchar *title_infom[5] = {"编号", "姓名", "性别", "年龄"};
-        init_employee_data = get_rows_from_mysql(mysql, "SELECT id,name,sex,age FROM employee");
-        vbox = function(s_window, title_infom, 4, 460, 0, init_employee_data);
+        printf("...\n");
+        init_employee_data = get_rows_from_mysql(mysql, "SELECT * FROM view_employee");
+        row=get_rownumber_from_mysql(mysql, "SELECT * FROM view_employee");
+        vbox = function(s_window, title_infom, 4, 460, 0, init_employee_data,row);
         gtk_container_add(GTK_CONTAINER(frame), vbox);
 
         ////function three///
         frame = gtk_frame_new("员工考勤信息");
         gtk_table_attach_defaults(GTK_TABLE(table), frame, 12, 25, 6, 18);
         gchar *title_attendance[4] = {"编号", "姓名", "日期", "考勤情况"};
-        char sql[1024];
-        //         snprintf(sql, 1024, "select record.id 员工编号,name 姓名,date_format(online_time,'%%Y-%%m-%%d') 日期, \
-// case \
-// when ((date_format(down_time,'%%H')-date_format(online_time,'%%H'))<%s)=1 then '缺勤' \
-// when ((date_format(down_time,'%%H')-date_format(online_time,'%%H'))>=%s)=1 then '全勤' \
-// end as 完成情况 \
-// from record,employee where employee.id=record.id order by 日期,员工编号",
-        //                  manage_time, manage_time);
-        // init_attendance_data = get_rows_from_mysql(mysql, sql);
-        vbox = function(s_window, title_attendance, 4, 680, 1, NULL);
+        init_attendance_data=get_rows_from_mysql(mysql, "SELECT * FROM view_record");
+        row=get_rownumber_from_mysql(mysql, "SELECT * FROM view_record");
+        vbox = function(s_window, title_attendance, 4, 680, 1, init_attendance_data,row);
         gtk_container_add(GTK_CONTAINER(frame), vbox);
         // gtk_box_pack_start(GTK_BOX(hbox), frame, TRUE, TRUE, 300);
     }
@@ -491,7 +493,7 @@ void get_personal_inform(int choice)
     {
         snprintf(sql, MID, "select * from employee where id='%s'", Input.id);
         printf("getting p...\n");
-        tmp = get_results_from_mysql(mysql, sql,0);
+        tmp = get_results_from_mysql(mysql, sql, 0);
         // head = p;
         // p = tmp;
         printf("get_personal_inform() as follow\n");
@@ -540,8 +542,8 @@ void send_notify(GtkWidget *widget, GtkTextBuffer *buffer)
     {
 
         g_print("send_notify():text_view:%s\n", text);
-        sprintf(sql, "insert into notify(notify) values ('%s')", text);
-        printf("sql ready!sql :%s\n", sql);
+        snprintf(sql,255, "insert into notify(notify,notify_time) values ('%s','%s')", text,get_current_time());
+        // printf("sql ready!sql :%s\n", sql);
         if (0 != insert_to_mysql(mysql, sql))
         {
             printf("error to write into the db\n");
@@ -596,15 +598,4 @@ void callBack(GtkWidget *widget, GtkWidget *button)
             main_page(choice);
         }
     }
-}
-
-char *longSQLcreated(char *num)
-{
-    char *sql;
-    char *part_of_sql1={"select record.id 员工编号,name 姓名,date_format(online_time,'%Y-%m-%d') 日期, case \
-when ((date_format(down_time,'%H')-date_format(online_time,'%H'))<"};
-    char *part_of_sql2={")=1 then '缺勤' when ((date_format(down_time,'%H')-date_format(online_time,'%H'))>="};
-    char *part_of_sql3={")=1 then '全勤' end as 完成情况 from record,employee where employee.id=record.id order by 日期,员工编号"};
-    snprintf(sql,1024,"%s %s %s %s %s",part_of_sql1,num,part_of_sql2,num,part_of_sql3);
-    return sql;
 }

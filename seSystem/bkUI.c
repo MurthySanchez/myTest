@@ -16,11 +16,11 @@ extern MYSQL_RES *res;
 GtkWidget *main_window, *s_window; //定义窗口
 GtkWidget *entryUser, *entryPW;    //entry
 char sys_name[SMALL];
-char *admin_name = {"null"};
-char *manage_time = {"8"};
+char *admin_name;
+char *manage_time;
 // GtkTextBuffer *buffer; //文本框缓冲区
 GtkTextIter *Iter;
-result_from_mysql *p=NULL, *head_a, *head_e, *head_u, *head_r, *head_n; //存放搜索结果
+result_from_mysql *p, *head_a, *head_e, *head_u, *head_r, *head_n; //存放搜索结果
 
 /*UI界面最新进展
  * 窗口搭建完成 846*600
@@ -134,6 +134,7 @@ void main_page(int user)
 
     char **init_employee_data, **init_attendance_data;
     // p = head;
+    printf("start mainpage.\n");
 
     // gchar **titles;
 
@@ -172,6 +173,7 @@ void main_page(int user)
     gtk_container_set_border_width(GTK_CONTAINER(hbox), 5);
     gtk_container_add(GTK_CONTAINER(frame), hbox);
 
+    printf("setting card.\n");
     // char src_image[SMALL] = {"./image/person/apple.jpeg"};
     char welcm_lebel[SMALL];
     if (user == 0)
@@ -206,9 +208,11 @@ void main_page(int user)
         // gtk_container_set_border_width(GTK_CONTAINER(vbox), 5);
         // gtk_table_attach_defaults(GTK_TABLE(table), vbox, 2, 21, 6, 15);
 
+        printf("preparing function one.\n");
         ////function one////
         frame = gtk_frame_new("温馨提示");
-        gtk_box_pack_start(GTK_BOX(vbox), frame, FALSE, FALSE, 5);
+        // gtk_table_attach_defaults(GTK_TABLE(table), frame, 2, 21, 6, 8);
+        // gtk_box_pack_start(GTK_BOX(vbox), frame, FALSE, FALSE, 5);
         char tips[HUGE];
         sprintf(record.start_time, "%s", get_current_time());
         snprintf(tips, HUGE, "现在时间是：%s，已录入考勤开始时间。\n结束时间将随您退出本程序计入程序后台，您可在系统内部自助查询。", record.start_time);
@@ -218,6 +222,7 @@ void main_page(int user)
         gtk_container_add(GTK_CONTAINER(frame), label);
         gtk_table_attach_defaults(GTK_TABLE(table), frame, 2, 21, 6, 8);
 
+        printf("preparing function two.\n");
         ////function two////
         // hbox = gtk_hbox_new(FALSE, 0);
         // gtk_container_set_border_width(GTK_CONTAINER(hbox), 5);
@@ -225,21 +230,28 @@ void main_page(int user)
 
         frame = gtk_frame_new("通知");
         // gtk_box_pack_start(GTK_BOX(hbox), frame, FALSE, FALSE, 5);
-        gtk_table_attach_defaults(GTK_TABLE(table), frame, 2, 9, 9, 18);
+
         // const gchar *notice;
-        // notice = get_inform_form_mysql(mysql, "select * from notify", "");
-        // printf("%s",notice);
-        // label = gtk_label_new(get_inform_form_mysql(mysql, "select * from notify", NULL));
-        // gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_LEFT);
-        // gtk_label_set_line_wrap(GTK_LABEL(label), TRUE);
-        // gtk_container_add(GTK_CONTAINER(frame), label);
+        result_from_mysql *tmp;
+        tmp = get_results_from_mysql(mysql, "select * from notify", 4);
+        // p = tmp;
+        while (tmp->r_n->next != NULL)
+        {
+            tmp->r_n = tmp->r_n->next;
+            printf("tmp->r_n:%s", tmp->r_n->notify);
+            label = gtk_label_new(tmp->r_n->notify);
+            gtk_container_add(GTK_CONTAINER(frame), label);
+            gtk_label_set_line_wrap(GTK_LABEL(label), TRUE);
+            gtk_label_set_justify(GTK_LABEL(label), GTK_JUSTIFY_LEFT);
+        }
+        gtk_table_attach_defaults(GTK_TABLE(table), frame, 2, 9, 9, 18);
 
         ////function three////
         frame = gtk_frame_new("考勤信息查询");
         // gtk_box_pack_start(GTK_BOX(hbox), frame, FALSE, FALSE, 140);
         gtk_table_attach_defaults(GTK_TABLE(table), frame, 11, 21, 9, 18);
         // vbox = function(s_window);
-        gtk_container_add(GTK_CONTAINER(frame), vbox);
+        // gtk_container_add(GTK_CONTAINER(frame), vbox);
 
         /*********************/
     }
@@ -282,10 +294,16 @@ void main_page(int user)
         frame = gtk_frame_new("员工考勤信息");
         gtk_table_attach_defaults(GTK_TABLE(table), frame, 12, 25, 6, 18);
         gchar *title_attendance[4] = {"编号", "姓名", "日期", "考勤情况"};
-        char *sql;
-        sql=longSQLcreated(manage_time);
-        init_attendance_data = get_rows_from_mysql(mysql, sql);
-        vbox = function(s_window, title_attendance, 4, 680, 1, init_attendance_data);
+        char sql[1024];
+        //         snprintf(sql, 1024, "select record.id 员工编号,name 姓名,date_format(online_time,'%%Y-%%m-%%d') 日期, \
+// case \
+// when ((date_format(down_time,'%%H')-date_format(online_time,'%%H'))<%s)=1 then '缺勤' \
+// when ((date_format(down_time,'%%H')-date_format(online_time,'%%H'))>=%s)=1 then '全勤' \
+// end as 完成情况 \
+// from record,employee where employee.id=record.id order by 日期,员工编号",
+        //                  manage_time, manage_time);
+        // init_attendance_data = get_rows_from_mysql(mysql, sql);
+        vbox = function(s_window, title_attendance, 4, 680, 1, NULL);
         gtk_container_add(GTK_CONTAINER(frame), vbox);
         // gtk_box_pack_start(GTK_BOX(hbox), frame, TRUE, TRUE, 300);
     }
@@ -330,6 +348,10 @@ void first_page()
 
     /*窗口初始化*/
     /*********************/
+    p = NULL; //回到主页初始化
+    res = NULL;
+    admin_name = "null";
+    manage_time = "8";
     main_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);       //创建一个置顶窗口
     gtk_window_set_title(GTK_WINDOW(main_window), "login");  //设置标题
     gtk_widget_set_size_request(main_window, WIDTH, HEIGHT); //设置大小
@@ -446,7 +468,7 @@ int UI(char *name)
     // main_page(1);
     // get_personal_inform("user");
     // search_mysql(mysql,"select * from admin");
-    // if (set_value_to_mysql(mysql, "insert into notify(notify) values ('insert into')"))
+    // if (insert_to_mysql(mysql, "insert into notify(notify) values ('insert into')"))
     // {
     //     printf("error.\n");
     // }else
@@ -456,7 +478,6 @@ int UI(char *name)
 
     gtk_main(); //gtk+2.0等待事件(如键盘事件或鼠标事件) 的发生
 }
-
 
 /**
  * 搜索员工信息表
@@ -470,9 +491,9 @@ void get_personal_inform(int choice)
     {
         snprintf(sql, MID, "select * from employee where id='%s'", Input.id);
         printf("getting p...\n");
-        p = get_results_from_mysql(mysql, sql, 0);
+        tmp = get_results_from_mysql(mysql, sql,0);
         // head = p;
-        tmp = p;
+        // p = tmp;
         printf("get_personal_inform() as follow\n");
         while (tmp->r_e->next != NULL)
         {
@@ -481,19 +502,19 @@ void get_personal_inform(int choice)
             employee.sex = tmp->r_e->sex;
             employee.age = tmp->r_e->age;
             employee.image = tmp->r_e->image;
-            printf("%s\t%s\t%s\t%s\t%s\n", tmp->r_e->id, tmp->r_e->name, tmp->r_e->sex, tmp->r_e->age, tmp->r_e->image);
-            printf("%s\n", employee.name);
+            printf("tmp->r_e:%s\t%s\t%s\t%s\t%s\n", tmp->r_e->id, tmp->r_e->name, tmp->r_e->sex, tmp->r_e->age, tmp->r_e->image);
+            printf("employee.name:%s\n", employee.name);
         }
-        printf("\n");
+        // printf("\n");
         printf("get_personal_inform():finish.\n");
     }
     else
     {
         snprintf(sql, MID, "select * from admin where id='%s'", Input.id);
-        p = get_results_from_mysql(mysql, sql, 1);
-        // sleep(1);
+        tmp = get_results_from_mysql(mysql, sql, 1);
+        // sleep(5);
         // head = p;
-        tmp = p;
+        p = tmp;
         // sleep(5);
         printf("admin name is as follow\n");
         tmp->r_a = tmp->r_a->next;
@@ -521,7 +542,7 @@ void send_notify(GtkWidget *widget, GtkTextBuffer *buffer)
         g_print("send_notify():text_view:%s\n", text);
         sprintf(sql, "insert into notify(notify) values ('%s')", text);
         printf("sql ready!sql :%s\n", sql);
-        if (0 != set_value_to_mysql(mysql, sql))
+        if (0 != insert_to_mysql(mysql, sql))
         {
             printf("error to write into the db\n");
         }

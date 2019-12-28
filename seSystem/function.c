@@ -376,8 +376,9 @@ void append_row(GtkWidget *button, gint data)
  * 1：admin员工考勤信息
  * 2：员工查看自身考勤信息
  * @inits:表格初始显示值
+ * @init_row:初始行数
  * */
-GtkWidget *function(GtkWidget *window, gchar **titles, int field, int length, gint id,char **inits)
+GtkWidget *function(GtkWidget *window, gchar **titles, int field, int length, gint id,char **inits, int init_row)
 {
     GtkWidget *vbox;
     GtkWidget *bbox;
