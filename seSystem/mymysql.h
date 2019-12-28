@@ -70,7 +70,7 @@ char **get_rows_from_mysql(MYSQL *mysql, const char *str);
 void display_mysql(MYSQL_RES *t_res);
 result_from_mysql *store_mysql(MYSQL_RES *res, int ch);
 result_from_mysql *get_results_from_mysql(MYSQL *mysql, const char *str, int ch);
-int get_rownumber_from_mysql(MYSQL *mysql, const char *str);
+int get_row_number_from_mysql(MYSQL *mysql, const char *str);
 int search_mysql(MYSQL *mysql, const char *str);
 int insert_to_mysql(MYSQL *mysql, const char *sql);
 int connect_mysql(MYSQL *mysql);

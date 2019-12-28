@@ -378,7 +378,7 @@ void append_row(GtkWidget *button, gint data)
  * @inits:表格初始显示值
  * @init_row:初始行数
  * */
-GtkWidget *function(GtkWidget *window, gchar **titles, int field, int length, gint id,char **inits, int init_row)
+GtkWidget *function(GtkWidget *window, gchar **titles, int field, int length, gint id, char **inits, int init_row)
 {
     GtkWidget *vbox;
     GtkWidget *bbox;
@@ -398,8 +398,10 @@ GtkWidget *function(GtkWidget *window, gchar **titles, int field, int length, gi
             gtk_clist_set_column_width(GTK_CLIST(clist0), i, length / field);
             gtk_clist_set_column_justification(GTK_CLIST(clist0), field, GTK_JUSTIFY_FILL);
         }
-        
-        gtk_clist_append(GTK_CLIST(clist0),inits);
+        for (int i = 0; i < init_row; i++)
+        {
+            gtk_clist_append(GTK_CLIST(clist0), inits);
+        }
         gtk_box_pack_start(GTK_BOX(vbox), clist0, TRUE, TRUE, 5);
 
         bbox = gtk_hbutton_box_new();
@@ -443,6 +445,10 @@ GtkWidget *function(GtkWidget *window, gchar **titles, int field, int length, gi
             gtk_clist_set_column_width(GTK_CLIST(clist1), i, length / field);
             gtk_clist_set_column_justification(GTK_CLIST(clist1), field, GTK_JUSTIFY_FILL);
         }
+        for (int i = 0; i < init_row; i++)
+        {
+            gtk_clist_append(GTK_CLIST(clist1), inits);
+        }
         gtk_box_pack_start(GTK_BOX(vbox), clist1, TRUE, TRUE, 5);
 
         bbox = gtk_hbutton_box_new();
@@ -485,6 +491,10 @@ GtkWidget *function(GtkWidget *window, gchar **titles, int field, int length, gi
         {
             gtk_clist_set_column_width(GTK_CLIST(clist2), i, length / field);
             gtk_clist_set_column_justification(GTK_CLIST(clist2), field, GTK_JUSTIFY_FILL);
+        }
+        for (int i = 0; i < init_row; i++)
+        {
+            gtk_clist_append(GTK_CLIST(clist2), inits);
         }
         gtk_box_pack_start(GTK_BOX(vbox), clist2, TRUE, TRUE, 5);
 

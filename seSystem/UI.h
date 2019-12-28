@@ -31,16 +31,17 @@ struct Output
 
 struct employee
 {
-    char *id;
-    char *name;
-    char *sex;
-    char *age;
-    char *image;
+    const char *id;
+    const char *name;
+    const char *sex;
+    const char *age;
+    const char *image;
 } employee;
 
 /*考勤开始，考勤结束时间*/
 struct record
 {
+    char record_id[8];
     char start_time[40];
     char end_time[40];
 } record;
@@ -51,7 +52,7 @@ void send_notify(GtkWidget *widget, GtkTextBuffer *buffer);
 void callBack(GtkWidget *widget, GtkWidget *button);
 char *longSQLcreated(char *num);
 void main_page(int user);
-
+void new_dialog(GtkWidget *widget, GtkMessageType type, const gchar *msg);
 int UI(char *name);
 
 #endif
