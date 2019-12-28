@@ -33,6 +33,7 @@ typedef struct results_employee
 typedef struct results_user
 {
     char *id;
+    char *account;
     char *passwd;
     char *status;
     struct results_user *next;
@@ -41,7 +42,6 @@ typedef struct results_user
 /*record结果集*/
 typedef struct results_record
 {
-    char *record_id;
     char *id;
     char *online_time;
     char *down_time;
@@ -53,7 +53,6 @@ typedef struct results_notify
 {
     char *id;
     char *notify;
-    char *notify_time;
     struct results_notify *next;
 } link_results_notify;
 
@@ -70,8 +69,10 @@ char **get_rows_from_mysql(MYSQL *mysql, const char *str);
 void display_mysql(MYSQL_RES *t_res);
 result_from_mysql *store_mysql(MYSQL_RES *res, int ch);
 result_from_mysql *get_results_from_mysql(MYSQL *mysql, const char *str, int ch);
+// const char *output_singal_mysql_result(MYSQL_RES *res);
+// const char *get_inform_form_mysql(MYSQL *mysql, const char *sql, const char *data);
 int search_mysql(MYSQL *mysql, const char *str);
-int insert_to_mysql(MYSQL *mysql, const char *sql);
+int set_value_to_mysql(MYSQL *mysql, const char *sql);
 int connect_mysql(MYSQL *mysql);
 int close_mysql(MYSQL *mysql);
 

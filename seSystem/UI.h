@@ -46,6 +46,10 @@ struct record
 } record;
 
 void first_page();
+void get_personal_inform(int choice);
+void send_notify(GtkWidget *widget, GtkTextBuffer *buffer);
+void callBack(GtkWidget *widget, GtkWidget *button);
+char *longSQLcreated(char *num);
 void main_page(int user);
 
 int UI(char *name);
