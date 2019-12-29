@@ -72,8 +72,7 @@ result_from_mysql *store_mysql(MYSQL_RES *res, int ch);
 result_from_mysql *get_results_from_mysql(MYSQL *mysql, const char *str, int ch);
 int get_row_number_from_mysql(MYSQL *mysql, const char *str);
 int search_mysql(MYSQL *mysql, const char *str);
-int del_from_mysql(MYSQL *t_mysql, const char *sql);
-int insert_to_mysql(MYSQL *mysql, const char *sql);
+int operate_to_mysql(MYSQL *mysql, const char *sql);
 int connect_mysql(MYSQL *mysql);
 int close_mysql(MYSQL *mysql);
 

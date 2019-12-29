@@ -284,33 +284,13 @@ int search_mysql(MYSQL *mysql, const char *str)
 
 
 /**
- * 写入数据库
+ * 数据库操作
  * 输入参数：
  * @mysql:mysql
  * @sql: sql语句
  * 返回值：0正确
  * */
-int insert_to_mysql(MYSQL *t_mysql, const char *sql)
-{
-    // MYSQL_RES *t_res; //记录集
-    printf("%s\n", sql);
-    if (mysql_real_query(t_mysql, sql, strlen(sql)))
-    {
-        printf("mysql_real_query():%s\n", mysql_error(t_mysql));
-        return -1;
-    }
-    return 0;
-}
-
-
-/**
- * 删除数据
- * 输入参数：
- * @mysql:mysql
- * @sql: sql语句
- * 返回值：0正确
- * */
-int del_from_mysql(MYSQL *t_mysql, const char *sql)
+int operate_to_mysql(MYSQL *t_mysql, const char *sql)
 {
     // MYSQL_RES *t_res; //记录集
     printf("%s\n", sql);

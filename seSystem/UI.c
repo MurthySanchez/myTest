@@ -486,16 +486,6 @@ int UI(char *name)
     gtk_init(NULL, NULL); //初始化
 
     first_page();
-    // main_page(1);
-    // get_personal_inform("user");
-    // search_mysql(mysql,"select * from admin");
-    // if (insert_to_mysql(mysql, "insert into notify(notify) values ('insert into')"))
-    // {
-    //     printf("error.\n");
-    // }else
-    // {
-    //     printf("insert success.\n");
-    // }
 
     gtk_main(); //gtk+2.0等待事件(如键盘事件或鼠标事件) 的发生
 }
@@ -563,7 +553,7 @@ void send_notify(GtkWidget *widget, GtkTextBuffer *buffer)
         g_print("send_notify():text_view:%s\n", text);
         snprintf(sql, 255, "insert into notify(notify,notify_time) values ('%s','%s')", text, get_current_time());
         // printf("sql ready!sql :%s\n", sql);
-        if (0 != insert_to_mysql(mysql, sql))
+        if (0 != operate_to_mysql(mysql, sql))
         {
             printf("error to write into the db\n");
         }
@@ -630,7 +620,7 @@ void go_back_to_firstPage(GtkWidget *widget, gint data)
         char sql[HUGE];
         snprintf(sql, HUGE, "insert into record(id,online_time,down_time) values ('%s','%s','%s')",
                  Input.id, record.start_time, record.end_time);
-        if (0 != insert_to_mysql(mysql, sql))
+        if (0 != operate_to_mysql(mysql, sql))
         {
             printf("error to write into the db\n");
         }
@@ -650,7 +640,7 @@ void delete_event(GtkWidget *widget, GdkEvent *event, gpointer data)
         sprintf(record.end_time, "%s", get_current_time());
         snprintf(sql, HUGE, "insert into record(id,online_time,down_time) values ('%s','%s','%s')",
                  Input.id, record.start_time, record.end_time);
-        if (0 != insert_to_mysql(mysql, sql))
+        if (0 != operate_to_mysql(mysql, sql))
         {
             printf("error to write into the db\n");
         }

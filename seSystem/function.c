@@ -50,7 +50,7 @@ void on_function_two_ok_clicked(GtkWidget *button, GtkWidget *window)
 
     snprintf(sql, HUGE, "insert into employee(id,name,sex,age) values ('%s','%s','%s','%s')",
              new_row[0], new_row[1], new_row[2], new_row[3]);
-    if (0 != insert_to_mysql(mysql, sql))
+    if (0 != operate_to_mysql(mysql, sql))
     {
         printf("error to write into the db\n");
         create_dialog(window, GTK_MESSAGE_ERROR, "输入有误，请检查输入！\n");
@@ -62,42 +62,95 @@ void on_function_two_ok_clicked(GtkWidget *button, GtkWidget *window)
     gtk_widget_destroy(window);
 }
 
-/*admin function three update user attendance state*/
-void on_function_three_ok_clicked(GtkWidget *button, GtkWidget *window)
-{
-    new_row[0] = gtk_entry_get_text(GTK_ENTRY(entry_id));
-    new_row[1] = gtk_entry_get_text(GTK_ENTRY(entry_name));
-    new_row[2] = gtk_entry_get_text(GTK_ENTRY(entry_date));
-    new_row[3] = gtk_entry_get_text(GTK_ENTRY(entry_state));
-    if (g_strcmp0(new_row[0], "") == 0)
-    {
-        g_print("please input the IDnumber!\n");
-        return;
-    }
-    row_count1++;
-    gtk_clist_append(GTK_CLIST(clist1), (gchar **)(new_row));
-    gtk_widget_destroy(window);
-}
+// /*admin function three update user attendance state*/
+// void on_function_three_ok_clicked(GtkWidget *button, GtkWidget *window)
+// {
+//     new_row[0] = gtk_entry_get_text(GTK_ENTRY(entry_id));
+//     new_row[1] = gtk_entry_get_text(GTK_ENTRY(entry_name));
+//     new_row[2] = gtk_entry_get_text(GTK_ENTRY(entry_date));
+//     new_row[3] = gtk_entry_get_text(GTK_ENTRY(entry_state));
+//     if (g_strcmp0(new_row[0], "") == 0)
+//     {
+//         g_print("please input the IDnumber!\n");
+//         return;
+//     }
+//     row_count1++;
+//     gtk_clist_append(GTK_CLIST(clist1), (gchar **)(new_row));
+//     gtk_widget_destroy(window);
+// }
 
 void on_ok_clicked(GtkWidget *button, GtkWidget *window)
 {
-    // new_row[0] = gtk_entry_get_text(GTK_ENTRY(entry_id));
-    // new_row[1] = gtk_entry_get_text(GTK_ENTRY(entry_name));
-    // new_row[2] = gtk_entry_get_text(GTK_ENTRY(entry_sex));
-    // new_row[3] = gtk_entry_get_text(GTK_ENTRY(entry_birthday));
-    // new_row[4] = gtk_entry_get_text(GTK_ENTRY(entry_email));
-    // if (g_strcmp0(new_row[0], "") == 0)
-    // {
-    //     g_print("please input the IDnumber!\n");
-    //     return;
-    // }
-    // row_count++;
-    // gtk_clist_append(GTK_CLIST(clist), (gchar **)(new_row));
-    // gtk_widget_destroy(window);
+    new_row[0] = gtk_entry_get_text(GTK_ENTRY(entry_id));
+    new_row[1] = gtk_entry_get_text(GTK_ENTRY(entry_name));
+    new_row[2] = gtk_entry_get_text(GTK_ENTRY(entry_sex));
+    new_row[3] = gtk_entry_get_text(GTK_ENTRY(entry_age));
+    new_row[4] = gtk_entry_get_text(GTK_ENTRY(entry_image));
+    char sql[HUGE];
+    snprintf(sql, HUGE, "update employee set name='%s' , sex='%s' , age='%s' , image='%s' where id='%s'",
+             new_row[1], new_row[2], new_row[3], new_row[4], new_row[0]);
+    if (0 != operate_to_mysql(mysql, sql))
+    {
+        printf("error to write into the db\n");
+        create_dialog(window, GTK_MESSAGE_ERROR, "输入有误，请检查输入！\n");
+        return;
+    }
+    create_dialog(window, GTK_MESSAGE_INFO, "修改成功,下次登陆方可查看！");
+    gtk_widget_destroy(window);
 }
 
-void goto_search_function_two(GtkWidget *button, gint data)
+void on_clicked(GtkWidget *button, GtkWidget *window)
 {
+    const char *search_for;
+    search_for=gtk_entry_get_text(GTK_ENTRY(entry_search));
+    if (g_strcmp0(search_for, "") == 0)
+    {
+        g_print("未输入ID\n");
+        create_dialog(window, GTK_MESSAGE_ERROR, "必须输入ID");
+        return;
+    }
+    char sql[HUGE];
+    snprintf(sql,HUGE,"select * from view_employee where 员工编号='%s'",search_for);
+    if(0!=search_mysql(mysql,sql))
+    {
+        create_dialog(window,GTK_MESSAGE_ERROR,"找不到您要的数据\n请查看是否数据输入错误");
+    }
+    create_dialog(window,GTK_MESSAGE_INFO,"找到您的数据！");
+    gtk_widget_destroy(window);
+}
+
+void goto_search_function_two(GtkWidget *button_t, gint data)
+{
+    GtkWidget *win;
+    GtkWidget *vbox;
+    GtkWidget *table;
+    GtkWidget *bbox;
+    GtkWidget *label;
+    GtkWidget *button;
+
+    win = gtk_dialog_new_with_buttons("按员工编号搜索", GTK_WINDOW(window_a), GTK_DIALOG_MODAL, NULL);
+    win = gtk_dialog_new();
+    gtk_window_set_title(GTK_WINDOW(win), "按员工编号搜索");
+    // table = gtk_table_new(2, 1, FALSE);
+    // gtk_container_add(GTK_CONTAINER(win), table);
+    gtk_container_set_border_width(GTK_CONTAINER(win), 1);
+    gtk_window_set_position(GTK_WINDOW(win), GTK_WIN_POS_CENTER);
+    g_signal_connect(G_OBJECT(win), "delete_event", G_CALLBACK(gtk_widget_destroy), win);
+    
+    vbox = gtk_vbox_new(FALSE, 0);
+    gtk_container_add(GTK_CONTAINER(win), vbox);
+    gtk_box_pack_start_defaults(GTK_BOX(GTK_DIALOG(win)->vbox), vbox);
+    table = gtk_table_new(3, 1, FALSE);
+    gtk_box_pack_start(GTK_BOX(vbox), table, FALSE, FALSE, 5);
+
+    entry_search = gtk_entry_new();
+    gtk_table_attach_defaults(GTK_TABLE(table), entry_search, 0, 1, 0, 1);
+
+    button_t = gtk_button_new_with_label("搜索");
+    g_signal_connect(G_OBJECT(button_t), "clicked", G_CALLBACK(on_clicked), win);
+    gtk_table_attach_defaults(GTK_TABLE(table), button_t, 0, 1, 2, 3);
+
+    gtk_widget_show_all(win);
 }
 
 /*点击取消，关闭子窗口*/
@@ -160,49 +213,49 @@ GtkWidget *create_addwin(GtkWidget *window, gint data, const gchar *text)
         gtk_box_pack_start(GTK_BOX(bbox), button, FALSE, FALSE, 5);
 
         break;
-    case 1:
-        win = gtk_dialog_new_with_buttons("修改员工考勤信息", GTK_WINDOW(window), GTK_DIALOG_MODAL, NULL);
-        win = gtk_dialog_new();
-        gtk_window_set_title(GTK_WINDOW(win), "添加员工考勤状态");
-        gtk_container_set_border_width(GTK_CONTAINER(win), 10);
-        gtk_window_set_position(GTK_WINDOW(win), GTK_WIN_POS_CENTER);
-        g_signal_connect(G_OBJECT(win), "delete_event", G_CALLBACK(gtk_widget_destroy), win);
-        vbox = gtk_vbox_new(FALSE, 0);
-        gtk_container_add(GTK_CONTAINER(win), vbox);
-        gtk_box_pack_start_defaults(GTK_BOX(GTK_DIALOG(win)->vbox), vbox);
-        table = gtk_table_new(4, 2, FALSE);
-        gtk_box_pack_start(GTK_BOX(vbox), table, FALSE, FALSE, 5);
+    // case 1:
+    //     win = gtk_dialog_new_with_buttons("修改员工考勤信息", GTK_WINDOW(window), GTK_DIALOG_MODAL, NULL);
+    //     win = gtk_dialog_new();
+    //     gtk_window_set_title(GTK_WINDOW(win), "添加员工考勤状态");
+    //     gtk_container_set_border_width(GTK_CONTAINER(win), 10);
+    //     gtk_window_set_position(GTK_WINDOW(win), GTK_WIN_POS_CENTER);
+    //     g_signal_connect(G_OBJECT(win), "delete_event", G_CALLBACK(gtk_widget_destroy), win);
+    //     vbox = gtk_vbox_new(FALSE, 0);
+    //     gtk_container_add(GTK_CONTAINER(win), vbox);
+    //     gtk_box_pack_start_defaults(GTK_BOX(GTK_DIALOG(win)->vbox), vbox);
+    //     table = gtk_table_new(4, 2, FALSE);
+    //     gtk_box_pack_start(GTK_BOX(vbox), table, FALSE, FALSE, 5);
 
-        label = gtk_label_new("员工编号");
-        gtk_table_attach_defaults(GTK_TABLE(table), label, 0, 1, 0, 1);
-        entry_id = gtk_entry_new();
-        gtk_table_attach_defaults(GTK_TABLE(table), entry_id, 1, 2, 0, 1);
-        label = gtk_label_new("姓名");
-        gtk_table_attach_defaults(GTK_TABLE(table), label, 0, 1, 1, 2);
-        entry_name = gtk_entry_new();
-        gtk_table_attach_defaults(GTK_TABLE(table), entry_name, 1, 2, 1, 2);
-        label = gtk_label_new("日期");
-        gtk_table_attach_defaults(GTK_TABLE(table), label, 0, 1, 2, 3);
-        entry_date = gtk_entry_new();
-        gtk_table_attach_defaults(GTK_TABLE(table), entry_date, 1, 2, 2, 3);
-        label = gtk_label_new("考勤状态");
-        gtk_table_attach_defaults(GTK_TABLE(table), label, 0, 1, 3, 4);
-        entry_state = gtk_entry_new();
-        gtk_table_attach_defaults(GTK_TABLE(table), entry_state, 1, 2, 3, 4);
+    //     label = gtk_label_new("员工编号");
+    //     gtk_table_attach_defaults(GTK_TABLE(table), label, 0, 1, 0, 1);
+    //     entry_id = gtk_entry_new();
+    //     gtk_table_attach_defaults(GTK_TABLE(table), entry_id, 1, 2, 0, 1);
+    //     label = gtk_label_new("姓名");
+    //     gtk_table_attach_defaults(GTK_TABLE(table), label, 0, 1, 1, 2);
+    //     entry_name = gtk_entry_new();
+    //     gtk_table_attach_defaults(GTK_TABLE(table), entry_name, 1, 2, 1, 2);
+    //     label = gtk_label_new("日期");
+    //     gtk_table_attach_defaults(GTK_TABLE(table), label, 0, 1, 2, 3);
+    //     entry_date = gtk_entry_new();
+    //     gtk_table_attach_defaults(GTK_TABLE(table), entry_date, 1, 2, 2, 3);
+    //     label = gtk_label_new("考勤状态");
+    //     gtk_table_attach_defaults(GTK_TABLE(table), label, 0, 1, 3, 4);
+    //     entry_state = gtk_entry_new();
+    //     gtk_table_attach_defaults(GTK_TABLE(table), entry_state, 1, 2, 3, 4);
 
-        bbox = gtk_hbutton_box_new();
-        gtk_box_pack_start(GTK_BOX(vbox), bbox, FALSE, FALSE, 5);
-        gtk_box_set_spacing(GTK_BOX(bbox), 5);
+    //     bbox = gtk_hbutton_box_new();
+    //     gtk_box_pack_start(GTK_BOX(vbox), bbox, FALSE, FALSE, 5);
+    //     gtk_box_set_spacing(GTK_BOX(bbox), 5);
 
-        gtk_button_box_set_layout(GTK_BUTTON_BOX(bbox), GTK_BUTTONBOX_END);
-        button = gtk_button_new_from_stock(GTK_STOCK_OK);
-        g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(on_function_three_ok_clicked), win);
-        gtk_box_pack_start(GTK_BOX(bbox), button, FALSE, FALSE, 5);
-        button = gtk_button_new_from_stock(GTK_STOCK_CANCEL);
-        g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(on_cancel_clicked), win);
-        gtk_box_pack_start(GTK_BOX(bbox), button, FALSE, FALSE, 5);
+    //     gtk_button_box_set_layout(GTK_BUTTON_BOX(bbox), GTK_BUTTONBOX_END);
+    //     button = gtk_button_new_from_stock(GTK_STOCK_OK);
+    //     g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(on_function_three_ok_clicked), win);
+    //     gtk_box_pack_start(GTK_BOX(bbox), button, FALSE, FALSE, 5);
+    //     button = gtk_button_new_from_stock(GTK_STOCK_CANCEL);
+    //     g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(on_cancel_clicked), win);
+    //     gtk_box_pack_start(GTK_BOX(bbox), button, FALSE, FALSE, 5);
 
-        break;
+    //     break;
     default: //user change inform
         win = gtk_dialog_new_with_buttons("修改员工个人信息", GTK_WINDOW(window), GTK_DIALOG_MODAL, NULL);
         win = gtk_dialog_new();
@@ -213,7 +266,7 @@ GtkWidget *create_addwin(GtkWidget *window, gint data, const gchar *text)
         vbox = gtk_vbox_new(FALSE, 0);
         gtk_container_add(GTK_CONTAINER(win), vbox);
         gtk_box_pack_start_defaults(GTK_BOX(GTK_DIALOG(win)->vbox), vbox);
-        table = gtk_table_new(6, 2, FALSE);
+        table = gtk_table_new(5, 2, FALSE);
         gtk_box_pack_start(GTK_BOX(vbox), table, FALSE, FALSE, 5);
 
         employ employee;
@@ -237,32 +290,32 @@ GtkWidget *create_addwin(GtkWidget *window, gint data, const gchar *text)
         entry_id = gtk_entry_new();
         gtk_entry_set_text(GTK_ENTRY(entry_id), text);
         gtk_entry_set_editable(GTK_ENTRY(entry_id), FALSE);
-        gtk_entry_set_text(GTK_ENTRY(entry_id),text);
+        gtk_entry_set_text(GTK_ENTRY(entry_id), text);
         gtk_table_attach_defaults(GTK_TABLE(table), entry_id, 1, 2, 0, 1);
         label = gtk_label_new("姓名");
         gtk_table_attach_defaults(GTK_TABLE(table), label, 0, 1, 1, 2);
         entry_name = gtk_entry_new();
-        gtk_entry_set_text(GTK_ENTRY(entry_name),employee.name);
+        gtk_entry_set_text(GTK_ENTRY(entry_name), employee.name);
         gtk_table_attach_defaults(GTK_TABLE(table), entry_name, 1, 2, 1, 2);
         label = gtk_label_new("性别");
         gtk_table_attach_defaults(GTK_TABLE(table), label, 0, 1, 2, 3);
         entry_sex = gtk_entry_new();
-        gtk_entry_set_text(GTK_ENTRY(entry_sex),employee.sex);
+        gtk_entry_set_text(GTK_ENTRY(entry_sex), employee.sex);
         gtk_table_attach_defaults(GTK_TABLE(table), entry_sex, 1, 2, 2, 3);
         label = gtk_label_new("年龄");
         gtk_table_attach_defaults(GTK_TABLE(table), label, 0, 1, 3, 4);
         entry_age = gtk_entry_new();
-        gtk_entry_set_text(GTK_ENTRY(entry_age),employee.age);
+        gtk_entry_set_text(GTK_ENTRY(entry_age), employee.age);
         gtk_table_attach_defaults(GTK_TABLE(table), entry_age, 1, 2, 3, 4);
         label = gtk_label_new("头像地址");
         gtk_table_attach_defaults(GTK_TABLE(table), label, 0, 1, 4, 5);
         entry_image = gtk_entry_new();
-        gtk_entry_set_text(GTK_ENTRY(entry_image),employee.image);
+        gtk_entry_set_text(GTK_ENTRY(entry_image), employee.image);
         gtk_table_attach_defaults(GTK_TABLE(table), entry_image, 1, 2, 4, 5);
-        label = gtk_label_new("密码");
-        gtk_table_attach_defaults(GTK_TABLE(table), label, 0, 1, 5, 6);
-        entry_passwd = gtk_entry_new();
-        gtk_table_attach_defaults(GTK_TABLE(table), entry_passwd, 1, 2, 5, 6);
+        // label = gtk_label_new("密码");
+        // gtk_table_attach_defaults(GTK_TABLE(table), label, 0, 1, 5, 6);
+        // entry_passwd = gtk_entry_new();
+        // gtk_table_attach_defaults(GTK_TABLE(table), entry_passwd, 1, 2, 5, 6);
 
         bbox = gtk_hbutton_box_new();
         gtk_box_pack_start(GTK_BOX(vbox), bbox, FALSE, FALSE, 5);
@@ -316,28 +369,6 @@ void goto_first(GtkWidget *button, gint data)
     }
 }
 
-/*去最后一行*/
-void goto_last(GtkWidget *button, gint data)
-{
-    switch (data)
-    {
-    case 0:
-        current_row0 = row_count0 - 1;
-        gtk_clist_select_row(GTK_CLIST(clist0), current_row0, 0);
-        break;
-    case 1:
-        current_row1 = row_count1 - 1;
-        gtk_clist_select_row(GTK_CLIST(clist1), current_row1, 0);
-        break;
-    case 2:
-        current_row2 = row_count2 - 1;
-        gtk_clist_select_row(GTK_CLIST(clist2), current_row2, 0);
-        break;
-    default:
-        break;
-    }
-}
-
 /*添加数据*/
 void append_row(GtkWidget *button, gint data)
 {
@@ -370,7 +401,7 @@ void del_employee(GtkWidget *button, GtkWidget *clist)
     printf("select_text:%s\n", select_text);
     char sql[MID];
     snprintf(sql, MID, "delete from employee where id='%s'", select_text);
-    if (0 != del_from_mysql(mysql, sql))
+    if (0 != operate_to_mysql(mysql, sql))
     {
         printf("error to write into the db\n");
         create_dialog(window_a, GTK_MESSAGE_ERROR, "删除失败！\n");
@@ -449,11 +480,6 @@ GtkWidget *function(GtkWidget *window, gchar **titles, int field, int length, gi
         g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(goto_first), (gpointer)0);
         gtk_box_pack_start(GTK_BOX(bbox), button, FALSE, FALSE, 2);
 
-        button = create_button(GTK_STOCK_GOTO_LAST);
-        gtk_tooltips_set_tip(GTK_TOOLTIPS(button_tips), button, "转到尾行", "尾行");
-        g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(goto_last), (gpointer)0);
-        gtk_box_pack_start(GTK_BOX(bbox), button, FALSE, FALSE, 2);
-
         button = create_button(GTK_STOCK_ADD);
         gtk_tooltips_set_tip(GTK_TOOLTIPS(button_tips), button, "新增一行", "新增");
         g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(append_row), (gpointer)0);
@@ -499,9 +525,6 @@ GtkWidget *function(GtkWidget *window, gchar **titles, int field, int length, gi
         g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(goto_first), (gpointer)1);
         gtk_box_pack_start(GTK_BOX(bbox), button, FALSE, FALSE, 2);
         button = create_button(GTK_STOCK_GOTO_LAST);
-        gtk_tooltips_set_tip(GTK_TOOLTIPS(button_tips), button, "转到尾行", "尾行");
-        g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(goto_last), (gpointer)1);
-        gtk_box_pack_start(GTK_BOX(bbox), button, FALSE, FALSE, 2);
 
         // button = create_button(GTK_STOCK_ADD);
         // gtk_tooltips_set_tip(GTK_TOOLTIPS(button_tips), button, "新增一行", "新增");
@@ -544,9 +567,7 @@ GtkWidget *function(GtkWidget *window, gchar **titles, int field, int length, gi
         g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(goto_first), (gpointer)2);
         gtk_box_pack_start(GTK_BOX(bbox), button, FALSE, FALSE, 2);
         button = create_button(GTK_STOCK_GOTO_LAST);
-        gtk_tooltips_set_tip(GTK_TOOLTIPS(button_tips), button, "转到尾行", "尾行");
-        g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(goto_last), (gpointer)2);
-        gtk_box_pack_start(GTK_BOX(bbox), button, FALSE, FALSE, 2);
+
         break;
     default:
         printf("error in function().\n");
