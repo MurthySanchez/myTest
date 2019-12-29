@@ -4,13 +4,14 @@
 #include <gtk/gtk.h>
 #include "function.h"
 #include "mymysql.h"
+#include "UI.h"
 #include "mysql/mysql.h"
 
 void on_function_three_ok_clicked(GtkWidget *button, GtkWidget *window);
 void on_ok_clicked(GtkWidget *button, GtkWidget *window);
 void goto_search(GtkWidget *button, gint data);
 void on_cancel_clicked(GtkWidget *button, GtkWidget *window);
-GtkWidget *create_addwin(GtkWidget *window, gint data);
+GtkWidget *create_addwin(GtkWidget *window, gint data,const gchar *text);
 GtkWidget *create_button(gchar *stockid);
 void goto_first(GtkWidget *button, gint data);
 void goto_last(GtkWidget *button, gint data);

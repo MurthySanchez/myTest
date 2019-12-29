@@ -66,25 +66,6 @@ result_from_mysql *get_results_from_mysql(MYSQL *mysql, const char *str, int ch)
 }
 
 /**
- * 写入数据库
- * 输入参数：
- * @mysql:mysql
- * @sql: sql语句
- * 返回值：0正确
- * */
-int insert_to_mysql(MYSQL *t_mysql, const char *sql)
-{
-    // MYSQL_RES *t_res; //记录集
-    printf("%s\n", sql);
-    if (mysql_real_query(t_mysql, sql, strlen(sql)))
-    {
-        printf("mysql_real_query():%s\n", mysql_error(t_mysql));
-        return -1;
-    }
-    return 0;
-}
-
-/**
  * 保存数据库结果
  * 输入数据：
  * @res:
@@ -265,55 +246,6 @@ void display_mysql(MYSQL_RES *t_res)
 
 }
 
-// /**
-//  * 获取数据库结果
-//  * input：MYSQL *mysql, const char *pre_sql, const char *data
-//  * @mysql:数据库
-//  * @pre_sql:select 语句
-//  * @data:查询的数据
-//  * */
-// const char *get_inform_form_mysql(MYSQL *mysql, const char *pre_sql, const char *data)
-// {
-    // MYSQL_RES *res; //记录集
-//     const char *result;
-//     char *sql;
-//     MYSQL_ROW row;
-//     int i;
-//     int iNum_rows = mysql_num_rows(res); //GET ROW
-//     printf("pre_sql:%s,data:%s\n", pre_sql, data);
-//     if (data != NULL)
-//     {
-//         sprintf(sql, "%s'%s'", pre_sql, data);
-//     }
-//     else
-//     {
-//         sprintf(sql, "%s", pre_sql);
-//     }
-//     printf("%s", sql);
-//     mysql_query(mysql, sql);
-//     if (!(mysql_real_query(mysql, sql, strlen(sql))))
-//     { //sql语句错误
-//         printf("mysql_real_query():%s\n", mysql_error(mysql));
-//         return "-1"; //failed
-//     }
-//     else
-//     {
-//         res = mysql_store_result(mysql);
-//         if (!(i = mysql_num_rows(res)))
-//         { //无搜索结果
-//             printf("cannot find any answer!\n");
-//             return "-1";
-//         }
-//     }
-
-//     while ((row = mysql_fetch_row(res))) // 打印结果集
-//     {
-//         result = row[0];
-//     }
-//     printf("\n");
-//     mysql_free_result(res); // 释放结果集
-//     return result;
-// }
 
 /**
  * 查询数据库
@@ -349,6 +281,47 @@ int search_mysql(MYSQL *mysql, const char *str)
 
     return 0;
 }
+
+
+/**
+ * 写入数据库
+ * 输入参数：
+ * @mysql:mysql
+ * @sql: sql语句
+ * 返回值：0正确
+ * */
+int insert_to_mysql(MYSQL *t_mysql, const char *sql)
+{
+    // MYSQL_RES *t_res; //记录集
+    printf("%s\n", sql);
+    if (mysql_real_query(t_mysql, sql, strlen(sql)))
+    {
+        printf("mysql_real_query():%s\n", mysql_error(t_mysql));
+        return -1;
+    }
+    return 0;
+}
+
+
+/**
+ * 删除数据
+ * 输入参数：
+ * @mysql:mysql
+ * @sql: sql语句
+ * 返回值：0正确
+ * */
+int del_from_mysql(MYSQL *t_mysql, const char *sql)
+{
+    // MYSQL_RES *t_res; //记录集
+    printf("%s\n", sql);
+    if (mysql_real_query(t_mysql, sql, strlen(sql)))
+    {
+        printf("mysql_real_query():%s\n", mysql_error(t_mysql));
+        return -1;
+    }
+    return 0;
+}
+
 
 /**
  * 连接mysql

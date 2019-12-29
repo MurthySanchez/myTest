@@ -1,6 +1,7 @@
 #include <gtk/gtk.h>
 #include "function.h"
 #include "mymysql.h"
+#include "UI.h"
 #include "mysql/mysql.h"
 
 const gchar *new_row[5];
@@ -15,15 +16,19 @@ static GtkWidget *entry_date;
 static GtkWidget *entry_state;
 static GtkWidget *entry_image;
 static GtkWidget *entry_passwd;
-
 static GtkWidget *window_a;
 
 gint current_row = 0, current_row0 = 0, current_row1 = 0, current_row2 = 0;
 gint row_count = 0, row_count0 = 0, row_count1 = 0, row_count2 = 0;
+char select_text[SMALL];
+int select_row;
+
+extern MYSQL *mysql;
 
 /*admin function two add user inform*/
 void on_function_two_ok_clicked(GtkWidget *button, GtkWidget *window)
 {
+    char sql[HUGE];
     new_row[0] = gtk_entry_get_text(GTK_ENTRY(entry_id));
     new_row[1] = gtk_entry_get_text(GTK_ENTRY(entry_name));
     new_row[2] = gtk_entry_get_text(GTK_ENTRY(entry_sex));
@@ -31,9 +36,27 @@ void on_function_two_ok_clicked(GtkWidget *button, GtkWidget *window)
 
     if (g_strcmp0(new_row[0], "") == 0)
     {
-        g_print("please input the IDnumber!\n");
+        g_print("未输入ID\n");
+        create_dialog(window, GTK_MESSAGE_ERROR, "必须输入ID");
         return;
     }
+
+    snprintf(sql, HUGE, "select * from employee where id='%s'", new_row[0]);
+    if (search_mysql(mysql, sql) == 0)
+    {
+        create_dialog(window, GTK_MESSAGE_ERROR, "错误：序号重复");
+        return;
+    }
+
+    snprintf(sql, HUGE, "insert into employee(id,name,sex,age) values ('%s','%s','%s','%s')",
+             new_row[0], new_row[1], new_row[2], new_row[3]);
+    if (0 != insert_to_mysql(mysql, sql))
+    {
+        printf("error to write into the db\n");
+        create_dialog(window, GTK_MESSAGE_ERROR, "输入有误，请检查输入！\n");
+        return;
+    }
+    create_dialog(window, GTK_MESSAGE_INFO, "成功录入，已设置用户初始密码。");
     row_count0++;
     gtk_clist_append(GTK_CLIST(clist0), (gchar **)(new_row));
     gtk_widget_destroy(window);
@@ -73,7 +96,7 @@ void on_ok_clicked(GtkWidget *button, GtkWidget *window)
     // gtk_widget_destroy(window);
 }
 
-void goto_search(GtkWidget *button, gint data)
+void goto_search_function_two(GtkWidget *button, gint data)
 {
 }
 
@@ -84,7 +107,7 @@ void on_cancel_clicked(GtkWidget *button, GtkWidget *window)
 }
 
 /*添加信息窗口*/
-GtkWidget *create_addwin(GtkWidget *window, gint data)
+GtkWidget *create_addwin(GtkWidget *window, gint data, const gchar *text)
 {
     GtkWidget *win;
     GtkWidget *vbox;
@@ -193,26 +216,48 @@ GtkWidget *create_addwin(GtkWidget *window, gint data)
         table = gtk_table_new(6, 2, FALSE);
         gtk_box_pack_start(GTK_BOX(vbox), table, FALSE, FALSE, 5);
 
+        employ employee;
+        result_from_mysql *tmp;
+        char sql[MID];
+        snprintf(sql, MID, "select * from employee where id='%s'", text);
+        tmp = get_results_from_mysql(mysql, sql, 0);
+        while (tmp->r_e->next != NULL)
+        {
+            tmp->r_e = tmp->r_e->next;
+            // snprintf(Input.id, 11, "%s", tmp->r_e->id);
+            snprintf(employee.name, 10, "%s", tmp->r_e->name);
+            snprintf(employee.sex, 10, "%s", tmp->r_e->sex);
+            snprintf(employee.age, 10, "%s", tmp->r_e->age);
+            snprintf(employee.image, MID, "%s", tmp->r_e->image);
+            printf("tmp->r_e:%s\t%s\t%s\t%s\t%s\n", tmp->r_e->id, tmp->r_e->name, tmp->r_e->sex, tmp->r_e->age, tmp->r_e->image);
+        }
+
         label = gtk_label_new("编号");
         gtk_table_attach_defaults(GTK_TABLE(table), label, 0, 1, 0, 1);
         entry_id = gtk_entry_new();
+        gtk_entry_set_text(GTK_ENTRY(entry_id), text);
         gtk_entry_set_editable(GTK_ENTRY(entry_id), FALSE);
+        gtk_entry_set_text(GTK_ENTRY(entry_id),text);
         gtk_table_attach_defaults(GTK_TABLE(table), entry_id, 1, 2, 0, 1);
         label = gtk_label_new("姓名");
         gtk_table_attach_defaults(GTK_TABLE(table), label, 0, 1, 1, 2);
         entry_name = gtk_entry_new();
+        gtk_entry_set_text(GTK_ENTRY(entry_name),employee.name);
         gtk_table_attach_defaults(GTK_TABLE(table), entry_name, 1, 2, 1, 2);
         label = gtk_label_new("性别");
         gtk_table_attach_defaults(GTK_TABLE(table), label, 0, 1, 2, 3);
         entry_sex = gtk_entry_new();
+        gtk_entry_set_text(GTK_ENTRY(entry_sex),employee.sex);
         gtk_table_attach_defaults(GTK_TABLE(table), entry_sex, 1, 2, 2, 3);
         label = gtk_label_new("年龄");
         gtk_table_attach_defaults(GTK_TABLE(table), label, 0, 1, 3, 4);
         entry_age = gtk_entry_new();
+        gtk_entry_set_text(GTK_ENTRY(entry_age),employee.age);
         gtk_table_attach_defaults(GTK_TABLE(table), entry_age, 1, 2, 3, 4);
         label = gtk_label_new("头像地址");
         gtk_table_attach_defaults(GTK_TABLE(table), label, 0, 1, 4, 5);
         entry_image = gtk_entry_new();
+        gtk_entry_set_text(GTK_ENTRY(entry_image),employee.image);
         gtk_table_attach_defaults(GTK_TABLE(table), entry_image, 1, 2, 4, 5);
         label = gtk_label_new("密码");
         gtk_table_attach_defaults(GTK_TABLE(table), label, 0, 1, 5, 6);
@@ -293,77 +338,51 @@ void goto_last(GtkWidget *button, gint data)
     }
 }
 
-/*下一行*/
-void goto_back(GtkWidget *button, gint data)
-{
-    switch (data)
-    {
-    case 0:
-        current_row0--;
-        if (current_row0 == -1)
-            return;
-        gtk_clist_select_row(GTK_CLIST(clist0), current_row0, 0);
-        break;
-    case 1:
-        current_row1--;
-        if (current_row1 == -1)
-            return;
-        gtk_clist_select_row(GTK_CLIST(clist1), current_row1, 0);
-        break;
-    case 2:
-        current_row2--;
-        if (current_row2 == -1)
-            return;
-        gtk_clist_select_row(GTK_CLIST(clist2), current_row2, 0);
-        break;
-    default:
-        break;
-    }
-}
-
-/*上一行*/
-void goto_forward(GtkWidget *button, gint data)
-{
-    switch (data)
-    {
-    case 0:
-        current_row0++;
-        if (current_row0 > row_count0)
-            return;
-        gtk_clist_select_row(GTK_CLIST(clist0), current_row0, 0);
-        break;
-    case 1:
-        current_row1++;
-        if (current_row1 > row_count1)
-            return;
-        gtk_clist_select_row(GTK_CLIST(clist1), current_row1, 0);
-        break;
-    case 2:
-        current_row2++;
-        if (current_row2 > row_count2)
-            return;
-        gtk_clist_select_row(GTK_CLIST(clist2), current_row2, 0);
-        break;
-    default:
-        break;
-    }
-}
-
 /*添加数据*/
 void append_row(GtkWidget *button, gint data)
 {
     switch (data)
     {
     case 0:
-        add_win = create_addwin(window_a, data);
+        add_win = create_addwin(window_a, data, NULL);
         break;
     case 1:
-        add_win = create_addwin(window_a, data);
+        add_win = create_addwin(window_a, data, NULL);
         break;
     default:
         g_print("something error in append_row().\n");
         break;
     }
+}
+void select_row_callback(GtkWidget *clist, gint row, gint column, GdkEventButton *event, gpointer data)
+{
+    gchar *text;
+    gtk_clist_get_text(GTK_CLIST(clist), row, 0, &text);
+    printf("row:%d,colum:%d,text:%s\n", row, column, text);
+    select_row = row;
+    snprintf(select_text, SMALL, "%s", text);
+}
+
+/*删除员工*/
+void del_employee(GtkWidget *button, GtkWidget *clist)
+{
+    MYSQL_ROW row;
+    printf("select_text:%s\n", select_text);
+    char sql[MID];
+    snprintf(sql, MID, "delete from employee where id='%s'", select_text);
+    if (0 != del_from_mysql(mysql, sql))
+    {
+        printf("error to write into the db\n");
+        create_dialog(window_a, GTK_MESSAGE_ERROR, "删除失败！\n");
+        return;
+    }
+    gtk_clist_remove(GTK_CLIST(clist), select_row);
+    create_dialog(window_a, GTK_MESSAGE_INFO, "成功删除此员工及其所有数据");
+}
+
+/*搜索*/
+void goto_search(GtkWidget *button, gint data)
+{
 }
 
 /**
@@ -397,7 +416,7 @@ GtkWidget *function(GtkWidget *window, gchar **titles, int field, int length, gi
         scolled_window = gtk_scrolled_window_new(NULL, NULL);
         gtk_container_set_border_width(GTK_CONTAINER(scolled_window), 10);
         gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scolled_window),
-                                       GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC); //垂直始终显示，水平不显示 
+                                       GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC); //垂直始终显示，水平不显示
         clist0 = gtk_clist_new_with_titles(field, titles);
         for (int i = 0; i < field; i++)
         {
@@ -408,6 +427,8 @@ GtkWidget *function(GtkWidget *window, gchar **titles, int field, int length, gi
         {
             gtk_clist_append(GTK_CLIST(clist0), row);
         }
+        gtk_signal_connect(GTK_OBJECT(clist0), "select_row",
+                           GTK_SIGNAL_FUNC(select_row_callback), NULL);
         gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(scolled_window), clist0);
         gtk_box_pack_start(GTK_BOX(vbox), scolled_window, TRUE, TRUE, 5);
 
@@ -421,20 +442,13 @@ GtkWidget *function(GtkWidget *window, gchar **titles, int field, int length, gi
         // gtk_box_pack_start(GTK_BOX(bbox), entry_search, FALSE, FALSE, 5);
         button = create_button(GTK_STOCK_FIND);
         gtk_tooltips_set_tip(GTK_TOOLTIPS(button_tips), button, "查询", "查询");
-        g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(goto_search), (gpointer)0);
+        g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(goto_search_function_two), (gpointer)0);
         gtk_box_pack_start(GTK_BOX(bbox), button, FALSE, FALSE, 2);
         button = create_button(GTK_STOCK_GOTO_FIRST);
         gtk_tooltips_set_tip(GTK_TOOLTIPS(button_tips), button, "转到首行", "首行");
         g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(goto_first), (gpointer)0);
         gtk_box_pack_start(GTK_BOX(bbox), button, FALSE, FALSE, 2);
-        button = create_button(GTK_STOCK_GO_BACK);
-        gtk_tooltips_set_tip(GTK_TOOLTIPS(button_tips), button, "转到前一行", "前一行");
-        g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(goto_back), (gpointer)0);
-        gtk_box_pack_start(GTK_BOX(bbox), button, FALSE, FALSE, 2);
-        button = create_button(GTK_STOCK_GO_FORWARD);
-        gtk_tooltips_set_tip(GTK_TOOLTIPS(button_tips), button, "转到下一行", "下一行");
-        g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(goto_forward), (gpointer)0);
-        gtk_box_pack_start(GTK_BOX(bbox), button, FALSE, FALSE, 2);
+
         button = create_button(GTK_STOCK_GOTO_LAST);
         gtk_tooltips_set_tip(GTK_TOOLTIPS(button_tips), button, "转到尾行", "尾行");
         g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(goto_last), (gpointer)0);
@@ -444,6 +458,12 @@ GtkWidget *function(GtkWidget *window, gchar **titles, int field, int length, gi
         gtk_tooltips_set_tip(GTK_TOOLTIPS(button_tips), button, "新增一行", "新增");
         g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(append_row), (gpointer)0);
         gtk_box_pack_start(GTK_BOX(bbox), button, FALSE, FALSE, 2);
+
+        button = create_button(GTK_STOCK_DELETE);
+        gtk_tooltips_set_tip(GTK_TOOLTIPS(button_tips), button, "删除一行", "删除");
+        g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(del_employee), clist0);
+        gtk_box_pack_start(GTK_BOX(bbox), button, FALSE, FALSE, 2);
+
         break;
     case 1: //admin
         scolled_window = gtk_scrolled_window_new(NULL, NULL);
@@ -478,23 +498,15 @@ GtkWidget *function(GtkWidget *window, gchar **titles, int field, int length, gi
         gtk_tooltips_set_tip(GTK_TOOLTIPS(button_tips), button, "转到首行", "首行");
         g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(goto_first), (gpointer)1);
         gtk_box_pack_start(GTK_BOX(bbox), button, FALSE, FALSE, 2);
-        button = create_button(GTK_STOCK_GO_BACK);
-        gtk_tooltips_set_tip(GTK_TOOLTIPS(button_tips), button, "转到前一行", "前一行");
-        g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(goto_back), (gpointer)1);
-        gtk_box_pack_start(GTK_BOX(bbox), button, FALSE, FALSE, 2);
-        button = create_button(GTK_STOCK_GO_FORWARD);
-        gtk_tooltips_set_tip(GTK_TOOLTIPS(button_tips), button, "转到下一行", "下一行");
-        g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(goto_forward), (gpointer)1);
-        gtk_box_pack_start(GTK_BOX(bbox), button, FALSE, FALSE, 2);
         button = create_button(GTK_STOCK_GOTO_LAST);
         gtk_tooltips_set_tip(GTK_TOOLTIPS(button_tips), button, "转到尾行", "尾行");
         g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(goto_last), (gpointer)1);
         gtk_box_pack_start(GTK_BOX(bbox), button, FALSE, FALSE, 2);
 
-        button = create_button(GTK_STOCK_ADD);
-        gtk_tooltips_set_tip(GTK_TOOLTIPS(button_tips), button, "新增一行", "新增");
-        g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(append_row), (gpointer)1);
-        gtk_box_pack_start(GTK_BOX(bbox), button, FALSE, FALSE, 2);
+        // button = create_button(GTK_STOCK_ADD);
+        // gtk_tooltips_set_tip(GTK_TOOLTIPS(button_tips), button, "新增一行", "新增");
+        // g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(append_row), (gpointer)1);
+        // gtk_box_pack_start(GTK_BOX(bbox), button, FALSE, FALSE, 2);
         break;
     case 2: //employee
         scolled_window = gtk_scrolled_window_new(NULL, NULL);
@@ -530,14 +542,6 @@ GtkWidget *function(GtkWidget *window, gchar **titles, int field, int length, gi
         button = create_button(GTK_STOCK_GOTO_FIRST);
         gtk_tooltips_set_tip(GTK_TOOLTIPS(button_tips), button, "转到首行", "首行");
         g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(goto_first), (gpointer)2);
-        gtk_box_pack_start(GTK_BOX(bbox), button, FALSE, FALSE, 2);
-        button = create_button(GTK_STOCK_GO_BACK);
-        gtk_tooltips_set_tip(GTK_TOOLTIPS(button_tips), button, "转到前一行", "前一行");
-        g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(goto_back), (gpointer)2);
-        gtk_box_pack_start(GTK_BOX(bbox), button, FALSE, FALSE, 2);
-        button = create_button(GTK_STOCK_GO_FORWARD);
-        gtk_tooltips_set_tip(GTK_TOOLTIPS(button_tips), button, "转到下一行", "下一行");
-        g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(goto_forward), (gpointer)2);
         gtk_box_pack_start(GTK_BOX(bbox), button, FALSE, FALSE, 2);
         button = create_button(GTK_STOCK_GOTO_LAST);
         gtk_tooltips_set_tip(GTK_TOOLTIPS(button_tips), button, "转到尾行", "尾行");

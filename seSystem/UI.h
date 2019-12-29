@@ -32,7 +32,7 @@ typedef struct Output
 
 typedef struct employee
 {
-    // const char *id;
+    char id[11];
     char name[10];
     char sex[10];
     char age[10];
@@ -51,10 +51,11 @@ void first_page();
 void get_personal_inform(int choice);
 void send_notify(GtkWidget *widget, GtkTextBuffer *buffer);
 void callBack(GtkWidget *widget, GtkWidget *button);
-char *longSQLcreated(char *num);
+// char *longSQLcreated(char *num);
 void main_page(int user);
-void new_dialog(GtkWidget *widget, GtkMessageType type, const gchar *msg);
+void create_dialog(GtkWidget *widget, GtkMessageType type, const gchar *msg);
 void go_back_to_firstPage(GtkWidget *widget, gint data);
+void delete_event(GtkWidget *widget, GdkEvent *event, gpointer data);
 int UI(char *name);
 
 #endif

@@ -62,25 +62,6 @@ char *get_current_time()
     return timestr;
 }
 
-void delete_event(GtkWidget *widget, GdkEvent *event, gpointer data)
-{
-    g_print("user clicked exit\n");
-    if (switch_exit)
-    {
-        char *sql;
-        char message[HUGE];
-        snprintf(sql, HUGE, "insert into record(id,online_time,down_time) values ('%s','%s','%s')",
-                 Input.id, record.start_time, record.end_time);
-        if (0 != insert_to_mysql(mysql, sql))
-        {
-            printf("error to write into the db\n");
-        }
-        snprintf(message, sizeof(message), "现在时间是%s，您已成功登出。\n已将结束时间计入考勤表中，您可自行查阅。", record.end_time);
-        new_dialog(NULL, GTK_MESSAGE_INFO, message);
-    }
-    gtk_main_quit();
-}
-
 void entry_toggle_visibility(GtkWidget *checkbutton, GtkWidget *entry)
 {
     gtk_entry_set_visibility(GTK_ENTRY(entry),
@@ -101,7 +82,7 @@ void enter_callback(GtkWidget *widget, GtkWidget *entry)
  * GTK_MESSAGE_QUESTION
  *GTK_MESSAGE_WARNING
  **/
-void new_dialog(GtkWidget *widget, GtkMessageType type, const gchar *msg)
+void create_dialog(GtkWidget *widget, GtkMessageType type, const gchar *msg)
 {
     GtkWidget *dialog;
     dialog = gtk_message_dialog_new(NULL,
@@ -114,10 +95,11 @@ void new_dialog(GtkWidget *widget, GtkMessageType type, const gchar *msg)
     // return dialog;
 }
 
-void update_inform(GtkWidget *widget, gpointer data)
+void update_inform(GtkWidget *widget, gchar *data)
 {
     GtkWidget *window;
-    window = create_addwin(s_window, 3);
+    printf("update_inform():%s\n",Input.id);
+    window = create_addwin(s_window, 3, Input.id);
 }
 
 /**
@@ -203,7 +185,7 @@ void main_page(int user)
     {
         image = gtk_image_new_from_file(em.image);
         gtk_box_pack_start(GTK_BOX(hbox), image, FALSE, FALSE, 5);
-        g_signal_connect(event_box, "button_press_event", G_CALLBACK(update_inform), (gpointer)frame);
+        g_signal_connect(event_box, "button_press_event", G_CALLBACK(update_inform), id);
         // sleep(1);
         sprintf(welcm_lebel, "欢迎您，\n%s", em.name);
         label = gtk_label_new(welcm_lebel);
@@ -387,8 +369,8 @@ void first_page()
     /*********************/
     p = NULL; //回到主页初始化
     res = NULL;
-    snprintf(admin_name,10, "null");
-    snprintf(manage_time,2,"8");
+    snprintf(admin_name, 10, "null");
+    snprintf(manage_time, 2, "8");
     switch_exit = 0;
 
     main_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);       //创建一个置顶窗口
@@ -537,7 +519,7 @@ void get_personal_inform(int choice)
         while (tmp->r_e->next != NULL)
         {
             tmp->r_e = tmp->r_e->next;
-            snprintf(Input.id , 11, "%s",tmp->r_e->id);
+            snprintf(Input.id, 11, "%s", tmp->r_e->id);
             snprintf(employee.name, 10, "%s", tmp->r_e->name);
             snprintf(employee.sex, 10, "%s", tmp->r_e->sex);
             snprintf(employee.age, 10, "%s", tmp->r_e->age);
@@ -558,7 +540,7 @@ void get_personal_inform(int choice)
         printf("admin name is as follow\n");
         tmp->r_a = tmp->r_a->next;
         printf("tmp->r_a->account:%s\n", tmp->r_a->account);
-        snprintf(admin_name ,10,"%s", tmp->r_a->account);
+        snprintf(admin_name, 10, "%s", tmp->r_a->account);
 
         printf("admin_name:%s\n", admin_name);
         // printf("%s\n",tmp->r_a->account);
@@ -585,7 +567,7 @@ void send_notify(GtkWidget *widget, GtkTextBuffer *buffer)
         {
             printf("error to write into the db\n");
         }
-        new_dialog(s_window, GTK_MESSAGE_INFO, "发布成功");
+        create_dialog(s_window, GTK_MESSAGE_INFO, "发布成功");
     }
 }
 /**
@@ -597,9 +579,9 @@ void callBack(GtkWidget *widget, GtkWidget *button)
     gboolean choice; //0:user,1:admin
     char ch[2][6] = {"user", "admin"};
     /*get input id and passwd*/
-    snprintf(Input.id ,10,"%s", gtk_entry_get_text(GTK_ENTRY(entryUser)));
+    snprintf(Input.id, 10, "%s", gtk_entry_get_text(GTK_ENTRY(entryUser)));
     printf("id is %s\n", Input.id);
-    snprintf(Input.passwd ,20,"%s", gtk_entry_get_text(GTK_ENTRY(entryPW)));
+    snprintf(Input.passwd, 20, "%s", gtk_entry_get_text(GTK_ENTRY(entryPW)));
     printf("passwd is %s\n", Input.passwd);
 
     if ((choice = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button))))
@@ -616,7 +598,7 @@ void callBack(GtkWidget *widget, GtkWidget *button)
     /*********************/
     if (search_mysql(mysql, Output.searchId))
     {
-        new_dialog(NULL, GTK_MESSAGE_ERROR, "不存在该用户！");
+        create_dialog(NULL, GTK_MESSAGE_ERROR, "不存在该用户！");
         printf("cannot find the people\n");
     }
     else
@@ -624,7 +606,7 @@ void callBack(GtkWidget *widget, GtkWidget *button)
         printf("%s trying online.\n", Input.id);
         if (search_mysql(mysql, Output.searchPasswd))
         {
-            new_dialog(NULL, GTK_MESSAGE_ERROR, "密码错误！");
+            create_dialog(NULL, GTK_MESSAGE_ERROR, "密码错误！");
             printf("wrong passwd!\n");
         }
         else
@@ -653,7 +635,27 @@ void go_back_to_firstPage(GtkWidget *widget, gint data)
             printf("error to write into the db\n");
         }
         snprintf(message, sizeof(message), "现在时间是%s，您已成功登出。\n已将结束时间计入考勤表中，您可自行查阅。", record.end_time);
-        new_dialog(main_window, GTK_MESSAGE_INFO, message);
+        create_dialog(main_window, GTK_MESSAGE_INFO, message);
     }
     first_page();
+}
+
+void delete_event(GtkWidget *widget, GdkEvent *event, gpointer data)
+{
+    g_print("user clicked exit\n");
+    if (switch_exit)
+    {
+        char sql[HUGE];
+        char message[HUGE];
+        sprintf(record.end_time, "%s", get_current_time());
+        snprintf(sql, HUGE, "insert into record(id,online_time,down_time) values ('%s','%s','%s')",
+                 Input.id, record.start_time, record.end_time);
+        if (0 != insert_to_mysql(mysql, sql))
+        {
+            printf("error to write into the db\n");
+        }
+        snprintf(message, sizeof(message), "现在时间是%s，您已成功登出。\n已将结束时间计入考勤表中，您可自行查阅。", record.end_time);
+        create_dialog(NULL, GTK_MESSAGE_INFO, message);
+    }
+    gtk_main_quit();
 }
