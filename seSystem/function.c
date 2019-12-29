@@ -527,10 +527,10 @@ GtkWidget *function(GtkWidget *window, gchar **titles, int field, int length, gi
         gtk_tooltips_set_tip(GTK_TOOLTIPS(button_tips), button, "转到尾行", "尾行");
         g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(goto_last), (gpointer)2);
         gtk_box_pack_start(GTK_BOX(bbox), button, FALSE, FALSE, 2);
-
         break;
-
     default:
+        printf("error in function().\n");
+        
         break;
     }
 

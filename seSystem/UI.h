@@ -16,35 +16,36 @@
 #define HUGE 256
 
 /*输入信息*/
-struct Input
+typedef struct Input
 {
     const gchar *id;
     const gchar *passwd;
-} Input;
+} In;
+
 
 /*由输入信息生成搜索语句*/
-struct Output
+typedef struct Output
 {
     char searchId[MID];
     char searchPasswd[HUGE];
-} Output;
+} Out;
 
-struct employee
+typedef struct employee
 {
     // const char *id;
-    const char *name;
-    const char *sex;
-    const char *age;
-    const char *image;
-} employee;
+    char name[10];
+    char sex[10];
+    char age[10];
+    char image[MID];
+} employ;
 
 /*考勤开始，考勤结束时间*/
-struct record
+typedef struct record
 {
     // char record_id[8];
     char start_time[40];
     char end_time[40];
-} record;
+} recrd;
 
 void first_page();
 void get_personal_inform(int choice);
@@ -53,6 +54,7 @@ void callBack(GtkWidget *widget, GtkWidget *button);
 char *longSQLcreated(char *num);
 void main_page(int user);
 void new_dialog(GtkWidget *widget, GtkMessageType type, const gchar *msg);
+void go_back_to_firstPage(GtkWidget *widget, gint data);
 int UI(char *name);
 
 #endif

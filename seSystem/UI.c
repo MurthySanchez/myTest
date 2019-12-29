@@ -19,6 +19,10 @@ char sys_name[SMALL];
 const char *admin_name;
 char *manage_time;
 int switch_exit = 0;
+employ employee;
+recrd record;
+In Input;
+Out Output;
 // GtkTextBuffer *buffer; //文本框缓冲区
 GtkTextIter *Iter;
 result_from_mysql *p, *head_a, *head_e, *head_u, *head_r, *head_n; //存放搜索结果
@@ -110,27 +114,6 @@ void new_dialog(GtkWidget *widget, GtkMessageType type, const gchar *msg)
     // return dialog;
 }
 
-void go_back_to_firstPage(GtkWidget *widget, gint data)
-{
-    char message[HUGE];
-    printf("user exit the system.\n");
-    gtk_widget_hide_all(s_window);
-    if (data == 0)
-    {
-        sprintf(record.end_time, "%s", get_current_time());
-        char *sql;
-        snprintf(sql, HUGE, "insert into record(id,online_time,down_time) values ('%s','%s','%s')",
-                 Input.id, record.start_time, record.end_time);
-        if (0 != insert_to_mysql(mysql, sql))
-        {
-            printf("error to write into the db\n");
-        }
-        snprintf(message, sizeof(message), "现在时间是%s，您已成功登出。\n已将结束时间计入考勤表中，您可自行查阅。", record.end_time);
-        new_dialog(main_window, GTK_MESSAGE_INFO, message);
-    }
-    first_page();
-}
-
 void update_inform(GtkWidget *widget, gpointer data)
 {
     GtkWidget *window;
@@ -157,10 +140,21 @@ void main_page(int user)
     MYSQL_RES *init_employee_data;
     MYSQL_RES *init_attendance_data;
     result_from_mysql *tmp;
+    employ em;
+    char id[10];
     char *sql;
+    char name[10];
+
+    snprintf(name, 10, "%s", admin_name);
+    snprintf(id, 11, "%s", Input.id);
     switch_exit = 1;
+    snprintf(em.name, 10, "%s", employee.name);
+    snprintf(em.age, 10, "%s", employee.age);
+    snprintf(em.sex, 10, "%s", employee.sex);
+    snprintf(em.image, MID, "%s", employee.image);
+
     // p = head;
-    printf("start mainpage.\n");
+    printf("start main_page.\n");
 
     // gchar **titles;
 
@@ -180,12 +174,15 @@ void main_page(int user)
     table = gtk_table_new(20, 28, TRUE);
     gtk_container_add(GTK_CONTAINER(s_window), table);
     // gtk_container_set_border_width(GTK_CONTAINER(table), 0); //设置窗口边框宽度
+    printf("ooooooooooooooooooo  employee:%s\t%s\t%s\t%s\n", id, em.name, em.sex, em.age);
 
     /*logo*/
     /*********************/
     image = gtk_image_new_from_file("./image/logo.png");
     gtk_table_attach_defaults(GTK_TABLE(table), image, 2, 7, 2, 4);
+    // gtk_widget_destroy(image);
     /*********************/
+    printf("ooooooooooooooooooo  employee:%s\t%s\t%s\t%s\n", id, em.name, em.sex, em.age);
 
     /*card*/
     /*********************/
@@ -204,10 +201,11 @@ void main_page(int user)
     char welcm_lebel[SMALL];
     if (user == 0)
     {
-        image = gtk_image_new_from_file(employee.image);
+        image = gtk_image_new_from_file(em.image);
         gtk_box_pack_start(GTK_BOX(hbox), image, FALSE, FALSE, 5);
         g_signal_connect(event_box, "button_press_event", G_CALLBACK(update_inform), (gpointer)frame);
-        sprintf(welcm_lebel, "欢迎您，\n%s", employee.name);
+        // sleep(1);
+        sprintf(welcm_lebel, "欢迎您，\n%s", em.name);
         label = gtk_label_new(welcm_lebel);
         // g_signal_connect(G_OBJECT(label), "clicked", G_CALLBACK(update_inform), NULL);
         gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 5);
@@ -218,8 +216,8 @@ void main_page(int user)
         gtk_box_pack_start(GTK_BOX(hbox), image, FALSE, FALSE, 5);
         printf("success open the image\n");
         sleep(1);
-        printf("admin_name :%s\n", admin_name);
-        sprintf(welcm_lebel, "欢迎您，\n%s", admin_name);
+        printf("admin_name :%s\n", name);
+        sprintf(welcm_lebel, "欢迎您，\n%s", name);
         label = gtk_label_new(welcm_lebel);
         gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 5);
     }
@@ -241,7 +239,7 @@ void main_page(int user)
         // gtk_box_pack_start(GTK_BOX(vbox), frame, FALSE, FALSE, 5);
         char tips[HUGE];
         sprintf(record.start_time, "%s", get_current_time());
-        printf("Input.id:%s\t record.start_time:%s\n", Input.id, record.start_time);
+        printf("Input.id:%s\t record.start_time:%s\n", id, record.start_time);
         snprintf(tips, HUGE, "现在时间是：%s，已录入考勤开始时间。\n结束时间将随您退出本程序计入程序后台，您可在系统内部自助查询。", record.start_time);
         // tmp = get_results_from_mysql(mysql, "select record_id from record", 3);
         // snprintf(record.record_id, SMALL, "%s", tmp->r_r->next->record_id);
@@ -277,6 +275,7 @@ void main_page(int user)
             gtk_label_set_line_wrap(GTK_LABEL(label), TRUE);
             gtk_box_pack_start(GTK_BOX(vbox), label, FALSE, TRUE, 5);
         }
+        printf("id is:%s", id);
         printf("ppppp\n");
         gtk_table_attach_defaults(GTK_TABLE(table), frame, 2, 9, 9, 18);
 
@@ -285,8 +284,8 @@ void main_page(int user)
         // gtk_box_pack_start(GTK_BOX(hbox), frame, FALSE, FALSE, 140);
         gtk_table_attach_defaults(GTK_TABLE(table), frame, 11, 21, 9, 18);
         gchar *title_infom[5] = {"编号", "日期", "上线时间", "下线时间"};
-        printf("...\n");
-        snprintf(sql, MID, "SELECT * FROM employee_view WHERE id='%s'", Input.id);
+        snprintf(sql, MID, "SELECT * FROM employee_view WHERE id='%s'", id);
+        printf("fkdlajdsl\n");
         init_employee = get_res_from_mysql(mysql, sql);
         // row = get_row_number_from_mysql(mysql, sql);
         vbox = function(s_window, title_infom, 4, 460, 2, init_employee);
@@ -392,6 +391,7 @@ void first_page()
     admin_name = "null";
     manage_time = "8";
     switch_exit = 0;
+
     main_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);       //创建一个置顶窗口
     gtk_window_set_title(GTK_WINDOW(main_window), "login");  //设置标题
     gtk_widget_set_size_request(main_window, WIDTH, HEIGHT); //设置大小
@@ -539,12 +539,11 @@ void get_personal_inform(int choice)
         {
             tmp->r_e = tmp->r_e->next;
             Input.id = tmp->r_e->id;
-            employee.name = tmp->r_e->name;
-            employee.sex = tmp->r_e->sex;
-            employee.age = tmp->r_e->age;
-            employee.image = tmp->r_e->image;
+            snprintf(employee.name, 10, "%s", tmp->r_e->name);
+            snprintf(employee.sex, 10, "%s", tmp->r_e->sex);
+            snprintf(employee.age, 10, "%s", tmp->r_e->age);
+            snprintf(employee.image, MID, "%s", tmp->r_e->image);
             printf("tmp->r_e:%s\t%s\t%s\t%s\t%s\n", tmp->r_e->id, tmp->r_e->name, tmp->r_e->sex, tmp->r_e->age, tmp->r_e->image);
-            printf("employee:%s\t%s\t%s\t%s\n", Input.id, employee.name, employee.sex, employee.age);
         }
         // printf("\n");
         printf("get_personal_inform():finish.\n");
@@ -637,4 +636,25 @@ void callBack(GtkWidget *widget, GtkWidget *button)
             main_page(choice);
         }
     }
+}
+
+void go_back_to_firstPage(GtkWidget *widget, gint data)
+{
+    char message[HUGE];
+    printf("user exit the system.\n");
+    gtk_widget_hide_all(s_window);
+    if (data == 0)
+    {
+        sprintf(record.end_time, "%s", get_current_time());
+        char *sql;
+        snprintf(sql, HUGE, "insert into record(id,online_time,down_time) values ('%s','%s','%s')",
+                 Input.id, record.start_time, record.end_time);
+        if (0 != insert_to_mysql(mysql, sql))
+        {
+            printf("error to write into the db\n");
+        }
+        snprintf(message, sizeof(message), "现在时间是%s，您已成功登出。\n已将结束时间计入考勤表中，您可自行查阅。", record.end_time);
+        new_dialog(main_window, GTK_MESSAGE_INFO, message);
+    }
+    first_page();
 }
