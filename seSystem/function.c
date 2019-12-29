@@ -383,6 +383,7 @@ GtkWidget *function(GtkWidget *window, gchar **titles, int field, int length, gi
     GtkWidget *vbox;
     GtkWidget *bbox;
     GtkWidget *button;
+    GtkWidget *scolled_window;
     GtkTooltips *button_tips;
     MYSQL_ROW row;
 
@@ -393,17 +394,22 @@ GtkWidget *function(GtkWidget *window, gchar **titles, int field, int length, gi
     switch (id)
     {
     case 0: //admin
+        scolled_window = gtk_scrolled_window_new(NULL, NULL);
+        gtk_container_set_border_width(GTK_CONTAINER(scolled_window), 10);
+        gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scolled_window),
+                                       GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC); //垂直始终显示，水平不显示 
         clist0 = gtk_clist_new_with_titles(field, titles);
         for (int i = 0; i < field; i++)
         {
             gtk_clist_set_column_width(GTK_CLIST(clist0), i, length / field);
             gtk_clist_set_column_justification(GTK_CLIST(clist0), field, GTK_JUSTIFY_FILL);
         }
-        while(row=mysql_fetch_row(inits))
+        while (row = mysql_fetch_row(inits))
         {
             gtk_clist_append(GTK_CLIST(clist0), row);
         }
-        gtk_box_pack_start(GTK_BOX(vbox), clist0, TRUE, TRUE, 5);
+        gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(scolled_window), clist0);
+        gtk_box_pack_start(GTK_BOX(vbox), scolled_window, TRUE, TRUE, 5);
 
         bbox = gtk_hbutton_box_new();
         button_tips = gtk_tooltips_new();
@@ -440,18 +446,22 @@ GtkWidget *function(GtkWidget *window, gchar **titles, int field, int length, gi
         gtk_box_pack_start(GTK_BOX(bbox), button, FALSE, FALSE, 2);
         break;
     case 1: //admin
+        scolled_window = gtk_scrolled_window_new(NULL, NULL);
+        gtk_container_set_border_width(GTK_CONTAINER(scolled_window), 10);
+        gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scolled_window),
+                                       GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC); //垂直始终显示，水平不显示
         clist1 = gtk_clist_new_with_titles(field, titles);
         for (int i = 0; i < field; i++)
         {
             gtk_clist_set_column_width(GTK_CLIST(clist1), i, length / field);
             gtk_clist_set_column_justification(GTK_CLIST(clist1), field, GTK_JUSTIFY_FILL);
         }
-        while(row=mysql_fetch_row(inits))
+        while (row = mysql_fetch_row(inits))
         {
             gtk_clist_append(GTK_CLIST(clist1), row);
         }
-        gtk_box_pack_start(GTK_BOX(vbox), clist1, TRUE, TRUE, 5);
-
+        gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(scolled_window), clist1);
+        gtk_box_pack_start(GTK_BOX(vbox), scolled_window, TRUE, TRUE, 5);
         bbox = gtk_hbutton_box_new();
         button_tips = gtk_tooltips_new();
         gtk_box_pack_start(GTK_BOX(vbox), bbox, FALSE, FALSE, 5);
@@ -487,17 +497,23 @@ GtkWidget *function(GtkWidget *window, gchar **titles, int field, int length, gi
         gtk_box_pack_start(GTK_BOX(bbox), button, FALSE, FALSE, 2);
         break;
     case 2: //employee
+        scolled_window = gtk_scrolled_window_new(NULL, NULL);
+        gtk_container_set_border_width(GTK_CONTAINER(scolled_window), 10);
+        gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scolled_window),
+                                       GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC); //垂直始终显示，水平不显示
+        clist1 = gtk_clist_new_with_titles(field, titles);
         clist2 = gtk_clist_new_with_titles(field, titles);
         for (int i = 0; i < field; i++)
         {
             gtk_clist_set_column_width(GTK_CLIST(clist2), i, length / field);
             gtk_clist_set_column_justification(GTK_CLIST(clist2), field, GTK_JUSTIFY_FILL);
         }
-        while(row=mysql_fetch_row(inits))
+        while (row = mysql_fetch_row(inits))
         {
             gtk_clist_append(GTK_CLIST(clist2), row);
         }
-        gtk_box_pack_start(GTK_BOX(vbox), clist2, TRUE, TRUE, 5);
+        gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(scolled_window), clist2);
+        gtk_box_pack_start(GTK_BOX(vbox), scolled_window, TRUE, TRUE, 5);
 
         bbox = gtk_hbutton_box_new();
         button_tips = gtk_tooltips_new();
@@ -530,7 +546,7 @@ GtkWidget *function(GtkWidget *window, gchar **titles, int field, int length, gi
         break;
     default:
         printf("error in function().\n");
-        
+
         break;
     }
 

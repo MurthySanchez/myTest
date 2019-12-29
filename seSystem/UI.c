@@ -42,7 +42,7 @@ result_from_mysql *p, *head_a, *head_e, *head_u, *head_r, *head_n; //存放搜�
 
 /**功能进展：
  * admin：function one ok
- * 
+ * 下拉框
  * 
  * */
 
