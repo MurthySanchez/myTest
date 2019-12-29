@@ -16,8 +16,8 @@ extern MYSQL_RES *res;
 GtkWidget *main_window, *s_window; //定义窗口
 GtkWidget *entryUser, *entryPW;    //entry
 char sys_name[SMALL];
-const char *admin_name;
-char *manage_time;
+char admin_name[10];
+char manage_time[2];
 int switch_exit = 0;
 employ employee;
 recrd record;
@@ -142,8 +142,8 @@ void main_page(int user)
     result_from_mysql *tmp;
     employ em;
     char id[10];
-    char *sql;
     char name[10];
+    char sql[MID];
 
     snprintf(name, 10, "%s", admin_name);
     snprintf(id, 11, "%s", Input.id);
@@ -275,7 +275,6 @@ void main_page(int user)
             gtk_label_set_line_wrap(GTK_LABEL(label), TRUE);
             gtk_box_pack_start(GTK_BOX(vbox), label, FALSE, TRUE, 5);
         }
-        printf("id is:%s", id);
         printf("ppppp\n");
         gtk_table_attach_defaults(GTK_TABLE(table), frame, 2, 9, 9, 18);
 
@@ -284,13 +283,13 @@ void main_page(int user)
         // gtk_box_pack_start(GTK_BOX(hbox), frame, FALSE, FALSE, 140);
         gtk_table_attach_defaults(GTK_TABLE(table), frame, 11, 21, 9, 18);
         gchar *title_infom[5] = {"编号", "日期", "上线时间", "下线时间"};
+        printf("...\n");
         snprintf(sql, MID, "SELECT * FROM employee_view WHERE id='%s'", id);
-        printf("fkdlajdsl\n");
         init_employee = get_res_from_mysql(mysql, sql);
         // row = get_row_number_from_mysql(mysql, sql);
         vbox = function(s_window, title_infom, 4, 460, 2, init_employee);
         gtk_container_add(GTK_CONTAINER(frame), vbox);
-        printf("user function finished.\n");
+        printf("user function finished.\n\n");
         // vbox = function(s_window);
         // gtk_container_add(GTK_CONTAINER(frame), vbox);
 
@@ -388,8 +387,8 @@ void first_page()
     /*********************/
     p = NULL; //回到主页初始化
     res = NULL;
-    admin_name = "null";
-    manage_time = "8";
+    snprintf(admin_name,10, "null");
+    snprintf(manage_time,2,"8");
     switch_exit = 0;
 
     main_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);       //创建一个置顶窗口
@@ -538,7 +537,7 @@ void get_personal_inform(int choice)
         while (tmp->r_e->next != NULL)
         {
             tmp->r_e = tmp->r_e->next;
-            Input.id = tmp->r_e->id;
+            snprintf(Input.id , 11, "%s",tmp->r_e->id);
             snprintf(employee.name, 10, "%s", tmp->r_e->name);
             snprintf(employee.sex, 10, "%s", tmp->r_e->sex);
             snprintf(employee.age, 10, "%s", tmp->r_e->age);
@@ -559,7 +558,7 @@ void get_personal_inform(int choice)
         printf("admin name is as follow\n");
         tmp->r_a = tmp->r_a->next;
         printf("tmp->r_a->account:%s\n", tmp->r_a->account);
-        admin_name = tmp->r_a->account;
+        snprintf(admin_name ,10,"%s", tmp->r_a->account);
 
         printf("admin_name:%s\n", admin_name);
         // printf("%s\n",tmp->r_a->account);
@@ -598,9 +597,9 @@ void callBack(GtkWidget *widget, GtkWidget *button)
     gboolean choice; //0:user,1:admin
     char ch[2][6] = {"user", "admin"};
     /*get input id and passwd*/
-    Input.id = gtk_entry_get_text(GTK_ENTRY(entryUser));
+    snprintf(Input.id ,10,"%s", gtk_entry_get_text(GTK_ENTRY(entryUser)));
     printf("id is %s\n", Input.id);
-    Input.passwd = gtk_entry_get_text(GTK_ENTRY(entryPW));
+    snprintf(Input.passwd ,20,"%s", gtk_entry_get_text(GTK_ENTRY(entryPW)));
     printf("passwd is %s\n", Input.passwd);
 
     if ((choice = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button))))
@@ -646,7 +645,7 @@ void go_back_to_firstPage(GtkWidget *widget, gint data)
     if (data == 0)
     {
         sprintf(record.end_time, "%s", get_current_time());
-        char *sql;
+        char sql[HUGE];
         snprintf(sql, HUGE, "insert into record(id,online_time,down_time) values ('%s','%s','%s')",
                  Input.id, record.start_time, record.end_time);
         if (0 != insert_to_mysql(mysql, sql))

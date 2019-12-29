@@ -18,8 +18,8 @@
 /*输入信息*/
 typedef struct Input
 {
-    const gchar *id;
-    const gchar *passwd;
+    char id[11];
+    char passwd[20];
 } In;
 
 
